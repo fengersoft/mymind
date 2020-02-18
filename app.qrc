@@ -1,0 +1,42 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/menu.png</file>
+        <file>res/add.png</file>
+        <file>res/name.png</file>
+        <file>res/remark.png</file>
+        <file>res/delete.png</file>
+        <file>res/link.png</file>
+        <file>res/open.png</file>
+        <file>res/flag.png</file>
+        <file>res/flags/1.png</file>
+        <file>res/flags/2.png</file>
+        <file>res/flags/3.png</file>
+        <file>res/flags/4.png</file>
+        <file>res/flags/5.png</file>
+        <file>res/flags/6.png</file>
+        <file>res/flags/7.png</file>
+        <file>res/flags/8.png</file>
+        <file>res/flags/9.png</file>
+        <file>res/flags/10.png</file>
+        <file>res/flags/11.png</file>
+        <file>res/flags/12.png</file>
+        <file>res/flags/13.png</file>
+        <file>res/flags/14.png</file>
+        <file>res/flags/15.png</file>
+        <file>res/flags/16.png</file>
+        <file>res/flags/17.png</file>
+        <file>res/flags/18.png</file>
+        <file>res/flags/19.png</file>
+        <file>res/background/1.jpg</file>
+        <file>res/background/2.jpg</file>
+        <file>res/background/3.jpg</file>
+        <file>res/background/4.jpg</file>
+        <file>res/background/5.jpg</file>
+        <file>res/background/6.jpg</file>
+        <file>res/background/7.jpg</file>
+        <file>res/background/8.jpg</file>
+        <file>res/background/9.jpg</file>
+        <file>res/background/10.jpg</file>
+        <file>res/app.png</file>
+    </qresource>
+</RCC>
