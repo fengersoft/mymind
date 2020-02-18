@@ -12,6 +12,7 @@ MindMapWidget::MindMapWidget(QWidget* parent)
     m_projectId = -1;
     m_cutObject = nullptr;
     m_backgroundId = 0;
+    m_screenshotFlag = false;
     setMouseTracking(true);
 }
 
@@ -290,10 +291,10 @@ void MindMapWidget::mousePressEvent(QMouseEvent* event)
                     return;
                 }
             }
-            showPopMenu();
+            showSelPopMenu();
 #else
             if (event->button() == Qt::RightButton) {
-                showPopMenu();
+                showSelPopMenu();
             }
 #endif
 
@@ -301,6 +302,24 @@ void MindMapWidget::mousePressEvent(QMouseEvent* event)
         }
     }
     m_selObject = nullptr;
+#ifdef Q_OS_ANDROID
+    QElapsedTimer t;
+    t.start();
+    while (t.elapsed() < 500) {
+        QApplication::processEvents();
+        if (m_mousedownFlag == false) {
+            return;
+        }
+    }
+    showPopMenu();
+#else
+    if (event->button() == Qt::RightButton) {
+        showPopMenu();
+    }
+#endif
+    if (m_screenshotFlag == true) {
+        m_startShot = pt;
+    }
     update();
 }
 
@@ -363,6 +382,14 @@ void MindMapWidget::getNodeCount(MindMapObject* pobj, int& n)
 void MindMapWidget::mouseReleaseEvent(QMouseEvent* event)
 {
     m_mousedownFlag = false;
+    if (m_screenshotFlag == true) {
+        QPoint pt = mapFromGlobal(cursor().pos());
+        QRect rc;
+        getSelectRect(rc, m_startShot, pt);
+        QPixmap pix = grab(rc);
+        qApp->clipboard()->setPixmap(pix);
+        m_screenshotFlag = false;
+    }
 }
 
 void MindMapWidget::getChilds(int pid, QList<int>& ids)
@@ -379,7 +406,14 @@ void MindMapWidget::getChilds(int pid, QList<int>& ids)
 
 void MindMapWidget::wheelEvent(QWheelEvent* event)
 {
-    m_rootPoint.setY(m_rootPoint.y() + event->delta());
+    if (!m_mousedownFlag == true) {
+        if (event->modifiers() == Qt::ControlModifier) {
+            m_rootPoint.setX(m_rootPoint.x() + event->delta());
+        } else {
+            m_rootPoint.setY(m_rootPoint.y() + event->delta());
+        }
+    }
+
     update();
 }
 
@@ -387,11 +421,16 @@ void MindMapWidget::mouseMoveEvent(QMouseEvent* event)
 {
     if (m_mousedownFlag) {
         QPoint pt = mapFromGlobal(cursor().pos());
-        int x = pt.x() - m_mousedownPoint.x();
-        int y = pt.y() - m_mousedownPoint.y();
-        m_rootPoint.setX(m_rootPoint.x() + x);
-        m_rootPoint.setY(m_rootPoint.y() + y);
-        m_mousedownPoint = pt;
+        if (m_screenshotFlag == true) {
+
+        } else {
+
+            int x = pt.x() - m_mousedownPoint.x();
+            int y = pt.y() - m_mousedownPoint.y();
+            m_rootPoint.setX(m_rootPoint.x() + x);
+            m_rootPoint.setY(m_rootPoint.y() + y);
+            m_mousedownPoint = pt;
+        }
     }
     update();
 }
@@ -464,7 +503,7 @@ void MindMapWidget::deleteProject()
     update();
 }
 
-void MindMapWidget::showPopMenu()
+void MindMapWidget::showSelPopMenu()
 {
     QPoint pt = m_selObject->rect.bottomLeft();
     pt = mapToGlobal(pt);
@@ -473,18 +512,75 @@ void MindMapWidget::showPopMenu()
     menuNames << "打开链接"
               << "使用百度搜索\"" + m_selObject->name() + "\""
               << "复制文本"
+              << "粘贴文本"
               << "设置文字颜色"
               << "设置文字背景"
               << "应用上次文字颜色效果"
               << "应用上次文字背景效果"
               << "应用上次文字效果"
+              << "添加空结点"
+              << "添加剪贴板内容为结点"
               << "标记结点"
               << "剪切结点"
               << "粘贴结点"
               << "上移结点"
               << "下移结点"
-              << "删除结点";
+              << "删除结点"
+              << "开始截图";
     for (int i = 0; i < menuNames.count(); i++) {
+        if (menuNames[i] == "打开链接") {
+            if (m_selObject->link().trimmed() == "") {
+                continue;
+            }
+        } else if (menuNames[i] == "粘贴结点") {
+            if (m_cutObject == nullptr) {
+                continue;
+            }
+        } else if (menuNames[i] == "粘贴文本") {
+            if (qApp->clipboard()->text() == "") {
+                continue;
+            }
+        } else if (menuNames[i] == "添加剪贴板内容为结点") {
+            if (qApp->clipboard()->text() == "") {
+                continue;
+            }
+        }
+        QAction* act = new QAction(this);
+        act->setText(menuNames[i]);
+        connect(act, &QAction::triggered, this, &MindMapWidget::onPopMenuTrigger);
+        menu->addAction(act);
+    }
+    menu->exec(pt);
+    delete menu;
+    m_mousedownFlag = false;
+}
+
+void MindMapWidget::showPopMenu()
+{
+    QPoint pt = mapFromGlobal(cursor().pos());
+    pt = mapToGlobal(pt);
+    QMenu* menu = new QMenu(this);
+    QStringList menuNames;
+    menuNames
+        << "开始截图";
+    for (int i = 0; i < menuNames.count(); i++) {
+        if (menuNames[i] == "打开链接") {
+            if (m_selObject->link().trimmed() == "") {
+                continue;
+            }
+        } else if (menuNames[i] == "粘贴结点") {
+            if (m_cutObject == nullptr) {
+                continue;
+            }
+        } else if (menuNames[i] == "粘贴文本") {
+            if (qApp->clipboard()->text() == "") {
+                continue;
+            }
+        } else if (menuNames[i] == "添加剪贴板内容为结点") {
+            if (qApp->clipboard()->text() == "") {
+                continue;
+            }
+        }
         QAction* act = new QAction(this);
         act->setText(menuNames[i]);
         connect(act, &QAction::triggered, this, &MindMapWidget::onPopMenuTrigger);
@@ -550,6 +646,7 @@ void MindMapWidget::saveDataAsPng()
 void MindMapWidget::drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHeight, int factor)
 {
     getMindWidgetsChildNum();
+    QPoint pt = mapFromGlobal(cursor().pos());
     QPainter painter;
     painter.begin(paintDevice);
     painter.scale(factor, factor);
@@ -567,6 +664,33 @@ void MindMapWidget::drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHe
     int y = m_rootPoint.y();
     drawNode(-1, x, y, x, y, painter);
     drawRemark(painter);
+    if ((m_screenshotFlag == true) && (m_mousedownFlag == true)) {
+
+        QRect drawRc, rc;
+        getSelectRect(drawRc, m_startShot, pt);
+
+        QPen pen = painter.pen();
+        pen.setColor(Qt::black);
+        pen.setStyle(Qt::DotLine);
+        painter.setPen(pen);
+        QColor color = QColor(0, 0, 0, 128);
+        rc.setRect(0, 0, width(), drawRc.top());
+        painter.fillRect(rc, QBrush(color));
+        rc.setRect(0, drawRc.bottom() + 1, width(), height() - drawRc.bottom() - 1);
+        painter.fillRect(rc, QBrush(color));
+
+        rc.setRect(0, drawRc.top(), drawRc.left(), drawRc.height());
+        painter.fillRect(rc, QBrush(color));
+        rc.setRect(drawRc.right() + 1, drawRc.top(), width() - drawRc.right() - 1, drawRc.height());
+        painter.fillRect(rc, QBrush(color));
+
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(drawRc);
+        pen = painter.pen();
+
+        pen.setStyle(Qt::SolidLine);
+        painter.setPen(pen);
+    }
     painter.end();
 }
 
@@ -644,6 +768,19 @@ void MindMapWidget::onAddChildNodeEvent()
     releaseMouseFlag();
 }
 
+void MindMapWidget::onAddChildNodeEvent(QString name)
+{
+    MindMapObject* selObj = selObject();
+    if (selObj == nullptr) {
+        return;
+    }
+    int pid = selObj->id();
+    int maxSxh = getNewMaxSxh(pid);
+    int id = m_myDao->addNode(selObj->id(), name, maxSxh);
+    addChildNode(selObj, id, name);
+    releaseMouseFlag();
+}
+
 int MindMapWidget::getNewMaxSxh(int pid)
 {
     QSqlQuery qry;
@@ -676,6 +813,19 @@ void MindMapWidget::showMindLineOutInfo(int pid, QString prefix, QStringList& in
             showMindLineOutInfo(obj->id(), prefix + "    ", infos);
         }
     }
+}
+
+void MindMapWidget::getSelectRect(QRect& rc, QPoint pt1, QPoint pt2)
+{
+    int x = pt1.x();
+    if (x > pt2.x()) {
+        x = pt2.x();
+    }
+    int y = pt1.y();
+    if (y > pt2.y()) {
+        y = pt2.y();
+    }
+    rc.setRect(x, y, abs(pt1.x() - pt2.x()), abs(pt1.y() - pt2.y()));
 }
 
 void MindMapWidget::onPopMenuTrigger()
@@ -792,6 +942,23 @@ void MindMapWidget::onPopMenuTrigger()
         }
     } else if (act->text() == "删除结点") {
         delSelObject();
+    } else if (act->text() == "粘贴文本") {
+        if (m_selObject == nullptr) {
+            return;
+        }
+        QString text = qApp->clipboard()->text();
+        if (text.trimmed() == "") {
+            return;
+        }
+        m_selObject->setName(text);
+        m_myDao->editNode(m_selObject->id(), text);
+        update();
+    } else if (act->text() == "添加空结点") {
+        onAddChildNodeEvent("");
+    } else if (act->text() == "添加剪贴板内容为结点") {
+        onAddChildNodeEvent(qApp->clipboard()->text());
+    } else if (act->text() == "开始截图") {
+        m_screenshotFlag = true;
     }
 }
 

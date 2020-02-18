@@ -56,6 +56,7 @@ public:
     void deleteNodeById(int id);
     int projectId();
     void deleteProject();
+    void showSelPopMenu();
     void showPopMenu();
     void releaseMouseFlag();
     void showEditMarkNodeDialog();
@@ -67,9 +68,11 @@ public:
     void setBackGroundId(int backGroundId);
     int backGroundId();
     void onAddChildNodeEvent();
+    void onAddChildNodeEvent(QString name);
     int getNewMaxSxh(int pid);
     void showMindLineOut();
     void showMindLineOutInfo(int pid, QString prefix, QStringList& infos);
+    void getSelectRect(QRect& rc, QPoint pt1, QPoint pt2);
 public slots:
     void onPopMenuTrigger();
 Q_SIGNALS:
@@ -88,6 +91,8 @@ private:
     int getMaxLen(QStringList& stl);
     int m_backgroundId;
     QPixmap m_backGroundPix;
+    bool m_screenshotFlag;
+    QPoint m_startShot;
     void loadBackground();
 };
 
