@@ -37,6 +37,8 @@ public:
     ~MindMapObject();
     void setSxh(int sxh);
     int sxh();
+    void setShowNum(int showNum);
+    bool showNum();
 
 private:
     int m_pid;
@@ -50,6 +52,7 @@ private:
     int m_fontColor;
     int m_backColor;
     int m_sxh;
+    bool m_showNum;
 signals:
 
 public slots:

@@ -92,7 +92,7 @@ void MindMapWidget::addNode(int pid, int id)
     if (pid == -1) {
         MindMapObject* obj = new MindMapObject(this);
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh from mind_data where id=%1 order by sxh,id").arg(id);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum from mind_data where id=%1 order by sxh,id").arg(id);
         m_myDao->sqliteWrapper->select(sql, qry);
         qry.next();
         obj->setPid(qry.value(0).toInt());
@@ -110,14 +110,17 @@ void MindMapWidget::addNode(int pid, int id)
             m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
         }
         obj->setSxh(i);
+
         addMarkNodes(obj);
+        bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
+        obj->setShowNum(showNum);
         m_mindMapObjects << obj;
         addNode(obj->id());
 
     } else {
 
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh from mind_data where pid=%1  order by sxh,id").arg(pid);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum from mind_data where pid=%1  order by sxh,id").arg(pid);
         m_myDao->sqliteWrapper->select(sql, qry);
         i = 1;
         while (qry.next()) {
@@ -135,6 +138,8 @@ void MindMapWidget::addNode(int pid, int id)
             obj->setSxh(i);
             obj->setFontColor(fontcolor);
             addMarkNodes(obj);
+            bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
+            obj->setShowNum(showNum);
             m_mindMapObjects << obj;
             addNode(obj->id());
             i++;
@@ -197,6 +202,21 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             obj->rect = fillRc;
             painter.fillRect(fillRc, painter.brush());
             QPen pen;
+            //绘制编号
+            if ((obj->parentObj() != nullptr) && (obj->parentObj()->showNum())) {
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(numColor(obj->sxh()));
+                QRect numRc;
+                numRc.setRect(fillRc.left() + 4, fillRc.top() + (fillRc.height() - 12) / 2, 12, 12);
+                painter.drawEllipse(numRc);
+                painter.setPen(Qt::white);
+                font = painter.font();
+                font.setBold(false);
+                font.setPointSize(9);
+                painter.setFont(font);
+                painter.drawText(numRc, Qt::AlignCenter, QString("%1").arg(obj->sxh()));
+            }
+
             painter.setPen(Qt::black);
             font = painter.font();
             font.setBold(false);
@@ -526,7 +546,8 @@ void MindMapWidget::showSelPopMenu()
               << "上移结点"
               << "下移结点"
               << "删除结点"
-              << "开始截图";
+              << "开始截图"
+              << "设置下级结点编号";
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
             if (m_selObject->link().trimmed() == "") {
@@ -751,6 +772,7 @@ void MindMapWidget::onAddChildNodeEvent()
     int maxSxh = getNewMaxSxh(pid);
     int id = m_myDao->addNode(selObj->id(), "", maxSxh);
     MindMapObject* obj = addChildNode(selObj, id, "");
+    obj->setSxh(maxSxh);
     update();
     EditNodeDialog* dlg = new EditNodeDialog();
     dlg->setWindowTitle("添加结点");
@@ -826,6 +848,21 @@ void MindMapWidget::getSelectRect(QRect& rc, QPoint pt1, QPoint pt2)
         y = pt2.y();
     }
     rc.setRect(x, y, abs(pt1.x() - pt2.x()), abs(pt1.y() - pt2.y()));
+}
+
+QColor MindMapWidget::numColor(int sxh)
+{
+    QColor colors[7] = { QColor(0, 0, 0), QColor(230, 66, 72),
+        QColor(249, 182, 42),
+        QColor(85, 101, 251),
+        QColor(187, 58, 172),
+        QColor(43, 204, 91),
+        QColor(28, 171, 252) };
+    if ((sxh >= 1) && (sxh <= 5)) {
+        return colors[sxh];
+    } else {
+        return colors[6];
+    }
 }
 
 void MindMapWidget::onPopMenuTrigger()
@@ -959,6 +996,11 @@ void MindMapWidget::onPopMenuTrigger()
         onAddChildNodeEvent(qApp->clipboard()->text());
     } else if (act->text() == "开始截图") {
         m_screenshotFlag = true;
+    } else if (act->text() == "设置下级结点编号") {
+        m_selObject->setShowNum(!m_selObject->showNum());
+        int shownum = m_selObject->showNum() == true ? 1 : 0;
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set shownum=%1 where id=%2").arg(shownum).arg(m_selObject->id()));
+        update();
     }
 }
 

@@ -73,6 +73,7 @@ public:
     void showMindLineOut();
     void showMindLineOutInfo(int pid, QString prefix, QStringList& infos);
     void getSelectRect(QRect& rc, QPoint pt1, QPoint pt2);
+    QColor numColor(int sxh);
 public slots:
     void onPopMenuTrigger();
 Q_SIGNALS:

@@ -13,6 +13,7 @@ MindMapObject::MindMapObject(QObject* parent)
     m_rootColor = colors[i];
     m_fontColor = 0;
     m_backColor = ColorTable::lastIndex();
+    m_showNum = false;
 }
 
 void MindMapObject::setPid(int pid)
@@ -118,4 +119,14 @@ void MindMapObject::setSxh(int sxh)
 int MindMapObject::sxh()
 {
     return m_sxh;
+}
+
+void MindMapObject::setShowNum(int showNum)
+{
+    m_showNum = showNum;
+}
+
+bool MindMapObject::showNum()
+{
+    return m_showNum;
 }
