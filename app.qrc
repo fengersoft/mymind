@@ -38,5 +38,6 @@
         <file>res/background/9.jpg</file>
         <file>res/background/10.jpg</file>
         <file>res/app.png</file>
+        <file>res/toolbar/dropdown.png</file>
     </qresource>
 </RCC>

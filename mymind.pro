@@ -31,6 +31,7 @@ SOURCES += \
     src/mainwindow.cpp \
     src/mindmapobject.cpp \
     src/mindmapwidget.cpp \
+    src/mindmapwidgettoolbar.cpp \
     src/mydao.cpp \
     src/openprojectdialog.cpp \
     src/openrecentdialog.cpp \
@@ -52,6 +53,7 @@ HEADERS += \
     src/mainwindow.h \
     src/mindmapobject.h \
     src/mindmapwidget.h \
+    src/mindmapwidgettoolbar.h \
     src/mydao.h \
     src/openprojectdialog.h \
     src/openrecentdialog.h \
@@ -68,6 +70,7 @@ FORMS += \
     src/editremarkdialog.ui \
     src/mainwindow.ui \
     src/mindmapwidget.ui \
+    src/mindmapwidgettoolbar.ui \
     src/openprojectdialog.ui \
     src/openrecentdialog.ui \
     src/setbackgrounddialog.ui \

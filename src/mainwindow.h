@@ -14,6 +14,7 @@
 #include "editlinkdialog.h"
 #include "editnodedialog.h"
 #include "editremarkdialog.h"
+#include "mindmapwidgettoolbar.h"
 #include "openrecentdialog.h"
 #include "setbackgrounddialog.h"
 
@@ -30,6 +31,7 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     MindMapWidget* mindMapWidget;
+    MindMapWidgetToolBar* mindMapWidgetToolBar;
     MyDao* myDao;
     void openDefaultProject();
     void addNewProject();
