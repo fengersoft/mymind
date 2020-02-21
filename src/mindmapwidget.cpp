@@ -92,59 +92,55 @@ void MindMapWidget::addNode(int pid, int id)
     if (pid == -1) {
         MindMapObject* obj = new MindMapObject(this);
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum from mind_data where id=%1 order by sxh,id").arg(id);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut from mind_data where id=%1 order by sxh,id").arg(id);
         m_myDao->sqliteWrapper->select(sql, qry);
         qry.next();
-        obj->setPid(qry.value(0).toInt());
-        obj->setId(qry.value(1).toInt());
-        obj->setName(qry.value(2).toString());
-        obj->setRemark(qry.value(3).toString());
-        obj->setLink(qry.value(4).toString());
-        int fontcolor = qry.value(5).isNull() ? 0 : qry.value(5).toInt();
-        obj->setFontColor(fontcolor);
+        addNodeInfo(obj, 1, qry);
 
-        int backColor = qry.value(6).isNull() ? ColorTable::lastIndex() : qry.value(6).toInt();
-        obj->setBackColor(backColor);
-        int sxh = qry.value(7).toInt();
-        if (sxh != i) {
-            m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
-        }
-        obj->setSxh(i);
-
-        addMarkNodes(obj);
-        bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
-        obj->setShowNum(showNum);
-        m_mindMapObjects << obj;
         addNode(obj->id());
 
     } else {
 
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum from mind_data where pid=%1  order by sxh,id").arg(pid);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut from mind_data where pid=%1  order by sxh,id").arg(pid);
         m_myDao->sqliteWrapper->select(sql, qry);
         i = 1;
         while (qry.next()) {
             MindMapObject* obj = new MindMapObject(this);
-            obj->setPid(qry.value(0).toInt());
-            obj->setId(qry.value(1).toInt());
-            obj->setName(qry.value(2).toString());
-            obj->setRemark(qry.value(3).toString());
-            obj->setLink(qry.value(4).toString());
-            int fontcolor = qry.value(5).isNull() ? 0 : qry.value(5).toInt();
-            int sxh = qry.value(7).toInt();
-            if (sxh != i) {
-                m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
-            }
-            obj->setSxh(i);
-            obj->setFontColor(fontcolor);
-            addMarkNodes(obj);
-            bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
-            obj->setShowNum(showNum);
-            m_mindMapObjects << obj;
+            addNodeInfo(obj, i, qry);
             addNode(obj->id());
             i++;
         }
     }
+}
+
+void MindMapWidget::addNodeInfo(MindMapObject* obj, int i, QSqlQuery& qry)
+{
+    obj->setPid(qry.value(0).toInt());
+    obj->setId(qry.value(1).toInt());
+    obj->setName(qry.value(2).toString());
+    obj->setRemark(qry.value(3).toString());
+    obj->setLink(qry.value(4).toString());
+    int fontcolor = qry.value(5).isNull() ? 0 : qry.value(5).toInt();
+    obj->setFontColor(fontcolor);
+
+    int backColor = qry.value(6).isNull() ? ColorTable::lastIndex() : qry.value(6).toInt();
+    obj->setBackColor(backColor);
+    int sxh = qry.value(7).toInt();
+    if (sxh != i) {
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
+    }
+    obj->setSxh(i);
+    obj->setBold(getQryValueBool(qry, "bold"));
+    obj->setItalics(getQryValueBool(qry, "italics"));
+    obj->setOverline(getQryValueBool(qry, "overline"));
+    obj->setUnderline(getQryValueBool(qry, "underline"));
+    obj->setStrikeOut(getQryValueBool(qry, "strikeOut"));
+
+    addMarkNodes(obj);
+    bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
+    obj->setShowNum(showNum);
+    m_mindMapObjects << obj;
 }
 
 MindMapObject* MindMapWidget::addChildNode(MindMapObject* pobj, int id, QString name)
@@ -178,10 +174,7 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             getNodeCount(obj, n);
             n = n == 0 ? 1 : n;
             n = n * 34;
-            font = painter.font();
-            font.setBold(false);
-            font.setPointSize(14);
-            painter.setFont(font);
+            setNodeNameFont(obj, painter, font);
             QFontMetrics fm = painter.fontMetrics();
             int reMarkWidth = obj->remark().trimmed() == "" ? 0 : 12;
             rc.setRect(x, y + n / 2 + m, fm.width(obj->name()) + 8 + reMarkWidth + 8 + obj->markNodes.count() * 16 + 64, 24);
@@ -218,10 +211,8 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             }
 
             painter.setPen(Qt::black);
-            font = painter.font();
-            font.setBold(false);
-            font.setPointSize(14);
-            painter.setFont(font);
+
+            setNodeNameFont(obj, painter, font);
             QRect textRc = rc;
             textRc.setLeft(rc.left() + 16);
             pen = painter.pen();
@@ -279,6 +270,10 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
         painter.drawEllipse(rc);
         painter.setPen(Qt::white);
         font = painter.font();
+        font.setItalic(false);
+        font.setUnderline(false);
+        font.setOverline(false);
+        font.setStrikeOut(false);
         font.setPointSize(24);
         font.setBold(true);
         painter.setFont(font);
@@ -865,6 +860,46 @@ QColor MindMapWidget::numColor(int sxh)
     }
 }
 
+void MindMapWidget::setNodeFontStyle(int setType)
+{
+    if (m_selObject == nullptr) {
+        return;
+    }
+    bool b = m_selObject->value(setType);
+    m_selObject->setValue(setType, !b);
+    b = m_selObject->value(setType);
+    QStringList fieldNames;
+    fieldNames << "bold"
+               << "italics"
+               << "overline"
+               << "underline"
+               << "strikeOut";
+    m_myDao->sqliteWrapper->execute(QString("update mind_data set %1=%2 "
+                                            "where id=%3")
+
+                                        .arg(fieldNames[setType])
+                                        .arg(b2i(b))
+                                        .arg(m_selObject->id()));
+    update();
+}
+
+int MindMapWidget::b2i(bool b)
+{
+    return b == true ? 1 : 0;
+}
+
+void MindMapWidget::setNodeNameFont(MindMapObject* obj, QPainter& painter, QFont& font)
+{
+    font = painter.font();
+    font.setBold(obj->bold());
+    font.setItalic(obj->italics());
+    font.setUnderline(obj->underline());
+    font.setOverline(obj->overline());
+    font.setStrikeOut(obj->strikOut());
+    font.setPointSize(14);
+    painter.setFont(font);
+}
+
 void MindMapWidget::onPopMenuTrigger()
 {
     m_mousedownFlag = false;
@@ -1029,4 +1064,31 @@ void MindMapWidget::loadBackground()
         m_backgroundId = 0;
     }
     setBackGroundId(m_backgroundId);
+}
+
+int MindMapWidget::getQryValue(QSqlQuery& qry, int index, int defaultValue)
+{
+    if (qry.value(index).isNull()) {
+        return defaultValue;
+    } else {
+        return qry.value(index).toInt();
+    }
+}
+
+int MindMapWidget::getQryValue(QSqlQuery& qry, QString fieldName, int defaultValue)
+{
+    if (qry.value(fieldName).isNull()) {
+        return defaultValue;
+    } else {
+        return qry.value(fieldName).toInt();
+    }
+}
+
+bool MindMapWidget::getQryValueBool(QSqlQuery& qry, QString fieldName, bool defaultValue)
+{
+    if (qry.value(fieldName).isNull()) {
+        return defaultValue;
+    } else {
+        return qry.value(fieldName).toInt() == 1;
+    }
 }

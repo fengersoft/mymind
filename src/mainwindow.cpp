@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget* parent)
     mindMapWidget->setMyDao(myDao);
     connect(mindMapWidget, &MindMapWidget::onDoubleClick, this, &MainWindow::on_btnEdit_clicked);
     mindMapWidgetToolBar = new MindMapWidgetToolBar(ui->wgtMindMapToolbar);
+    mindMapWidgetToolBar->setMindMapWidget(mindMapWidget);
     QHBoxLayout* laytool = new QHBoxLayout();
     ui->wgtMindMapToolbar->setLayout(laytool);
     laytool->setMargin(0);

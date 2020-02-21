@@ -7,6 +7,11 @@
 #include <QRect>
 #include <QSet>
 #include <QtDebug>
+const int SET_BOLD = 0;
+const int SET_ITALICS = 1;
+const int SET_UNDERLINE = 2;
+const int SET_OVERLINE = 3;
+const int SET_STRIKEOUT = 4;
 class MindMapObject : public QObject {
     Q_OBJECT
 public:
@@ -39,6 +44,18 @@ public:
     int sxh();
     void setShowNum(int showNum);
     bool showNum();
+    void setBold(bool bold);
+    bool bold();
+    void setItalics(bool italics);
+    bool italics();
+    void setOverline(bool overline);
+    bool overline();
+    void setUnderline(bool underline);
+    bool underline();
+    void setStrikeOut(bool strikeOut);
+    bool strikOut();
+    bool value(int setType);
+    void setValue(int setType, bool value);
 
 private:
     int m_pid;
@@ -53,6 +70,11 @@ private:
     int m_backColor;
     int m_sxh;
     bool m_showNum;
+    bool m_bold;
+    bool m_italics;
+    bool m_overline;
+    bool m_underline;
+    bool m_strikeOut;
 signals:
 
 public slots:

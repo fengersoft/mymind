@@ -38,6 +38,7 @@ public:
     void drawRemark(QPainter& painter);
     void clear();
     void addNode(int pid, int id = 0);
+    void addNodeInfo(MindMapObject* obj, int i, QSqlQuery& qry);
     MindMapObject* addChildNode(MindMapObject* pobj, int id, QString name);
     void setMyDao(MyDao* myDao);
     void drawNode(int pid, int px, int py, int x, int y, QPainter& painter);
@@ -74,6 +75,9 @@ public:
     void showMindLineOutInfo(int pid, QString prefix, QStringList& infos);
     void getSelectRect(QRect& rc, QPoint pt1, QPoint pt2);
     QColor numColor(int sxh);
+    void setNodeFontStyle(int setType);
+    int b2i(bool b);
+    void setNodeNameFont(MindMapObject* obj, QPainter& painter, QFont& font);
 public slots:
     void onPopMenuTrigger();
 Q_SIGNALS:
@@ -95,6 +99,9 @@ private:
     bool m_screenshotFlag;
     QPoint m_startShot;
     void loadBackground();
+    int getQryValue(QSqlQuery& qry, int index, int defaultValue);
+    int getQryValue(QSqlQuery& qry, QString fieldName, int defaultValue);
+    bool getQryValueBool(QSqlQuery& qry, QString fieldName, bool defaultValue = false);
 };
 
 #endif // MINDMAPWIDGET_H

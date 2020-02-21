@@ -4,7 +4,7 @@ MindMapObject::MindMapObject(QObject* parent)
     : QObject(parent)
 {
     m_parentObj = nullptr;
-    QColor colors[12] = { QColor(229, 77, 66), QColor(243, 123, 29), QColor(251, 189, 8),
+    static QColor colors[12] = { QColor(229, 77, 66), QColor(243, 123, 29), QColor(251, 189, 8),
         QColor(141, 198, 63), QColor(57, 181, 74), QColor(28, 187, 180), QColor(0, 129, 255),
         QColor(103, 57, 182), QColor(156, 38, 176), QColor(224, 57, 151), QColor(165, 103, 63), QColor(135, 153, 163) };
     int i = qrand() % 12;
@@ -129,4 +129,85 @@ void MindMapObject::setShowNum(int showNum)
 bool MindMapObject::showNum()
 {
     return m_showNum;
+}
+
+void MindMapObject::setBold(bool bold)
+{
+    m_bold = bold;
+}
+
+bool MindMapObject::bold()
+{
+    return m_bold;
+}
+
+void MindMapObject::setItalics(bool italics)
+{
+    m_italics = italics;
+}
+
+bool MindMapObject::italics()
+{
+    return m_italics;
+}
+
+void MindMapObject::setOverline(bool overline)
+{
+    m_overline = overline;
+}
+
+bool MindMapObject::overline()
+{
+    return m_overline;
+}
+
+void MindMapObject::setUnderline(bool underline)
+{
+    m_underline = underline;
+}
+
+bool MindMapObject::underline()
+{
+    return m_underline;
+}
+
+void MindMapObject::setStrikeOut(bool strikeOut)
+{
+    m_strikeOut = strikeOut;
+}
+
+bool MindMapObject::strikOut()
+{
+    return m_strikeOut;
+}
+
+void MindMapObject::setValue(int setType, bool value)
+{
+    if (setType == SET_BOLD) {
+        setBold(value);
+    } else if (setType == SET_ITALICS) {
+        setItalics(value);
+    } else if (setType == SET_OVERLINE) {
+        setOverline(value);
+    } else if (setType == SET_UNDERLINE) {
+        setUnderline(value);
+    } else if (setType == SET_STRIKEOUT) {
+        setStrikeOut(value);
+    }
+}
+
+bool MindMapObject::value(int setType)
+{
+    if (setType == SET_BOLD) {
+        return bold();
+    } else if (setType == SET_ITALICS) {
+        return italics();
+    } else if (setType == SET_OVERLINE) {
+        return overline();
+    } else if (setType == SET_UNDERLINE) {
+        return underline();
+    } else if (setType == SET_STRIKEOUT) {
+        return strikOut();
+    }
+    return false;
 }

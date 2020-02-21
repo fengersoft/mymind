@@ -2,13 +2,15 @@
 #define MINDMAPWIDGETTOOLBAR_H
 
 #include "api/color/colortable.h"
+#include "mindmapwidget.h"
 #include <QColor>
 #include <QPainter>
 #include <QWidget>
+
 namespace Ui {
 class MindMapWidgetToolBar;
 }
-
+class MindMapWidget;
 class MindMapWidgetToolBar : public QWidget {
     Q_OBJECT
 
@@ -17,6 +19,8 @@ public:
     ~MindMapWidgetToolBar();
     void paintEvent(QPaintEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
+    void setMindMapWidget(MindMapWidget* mindMapWidget);
+    void mousePressEvent(QMouseEvent* event);
 
 private:
     Ui::MindMapWidgetToolBar* ui;
@@ -28,9 +32,13 @@ private:
     QRect m_fontBackColorRect;
     QRect m_fontBackColorLeftRect;
     QRect m_fontBackColorRightRect;
+    QRect m_fontColorRect;
+    QRect m_fontColorLeftRect;
+    QRect m_fontColorRightRect;
     QPixmap m_dropdownPix;
     QBrush getSelBrush(QPoint& pt, QRect& rc);
     QPen getSelPen(QPoint& pt, QRect& rc);
+    MindMapWidget* m_mindMapWidget;
 };
 
 #endif // MINDMAPWIDGETTOOLBAR_H

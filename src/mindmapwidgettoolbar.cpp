@@ -15,6 +15,10 @@ MindMapWidgetToolBar::MindMapWidgetToolBar(QWidget* parent)
     m_fontBackColorRect.setRect(m_overLineRect.right() + 4, 4, 36, 24);
     m_fontBackColorLeftRect.setRect(m_overLineRect.right() + 4, 4, 24, 24);
     m_fontBackColorRightRect.setRect(m_fontBackColorLeftRect.right() + 1, 4, 12, 24);
+    m_fontColorRect.setRect(m_fontBackColorRect.right() + 4, 4, 36, 24);
+    m_fontColorLeftRect.setRect(m_fontBackColorRect.right() + 4, 4, 24, 24);
+    m_fontColorRightRect.setRect(m_fontColorLeftRect.right() + 1, 4, 12, 24);
+
     m_dropdownPix = QPixmap(":/res/toolbar/dropdown.png");
 }
 
@@ -123,7 +127,7 @@ void MindMapWidgetToolBar::paintEvent(QPaintEvent* event)
 
     painter.fillRect(m_fontBackColorRightRect, getSelBrush(pt, m_fontBackColorRightRect));
     painter.setPen(pen);
-    painter.drawLine(fontBackRc.left() + 8, fontBackRc.bottom() - 2, fontBackRc.left() + 24, fontBackRc.bottom() - 2);
+    painter.drawLine(fontBackRc.left() + 8, fontBackRc.bottom() - 2, fontBackRc.left() + 22, fontBackRc.bottom() - 2);
     QRect fontBackDownRc = m_fontBackColorRect;
     fontBackDownRc.setLeft(m_fontBackColorRect.right() - 10);
     fontBackDownRc.setTop(m_fontBackColorRect.top() + 4);
@@ -133,12 +137,69 @@ void MindMapWidgetToolBar::paintEvent(QPaintEvent* event)
     painter.drawPixmap(fontBackDownRc, m_dropdownPix, m_dropdownPix.rect());
     painter.restore();
 
+    //绘制文字颜色按钮
+    painter.save();
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(getSelPen(pt, m_fontColorRect));
+    painter.drawRect(m_fontColorRect);
+    painter.fillRect(m_fontColorLeftRect, getSelBrush(pt, m_fontColorLeftRect));
+    painter.setPen(Qt::black);
+    font = painter.font();
+    font.setPointSize(17);
+    painter.setFont(font);
+    QRect fontRc = m_fontColorRect;
+    fontRc.setWidth(24);
+    QRect textRc = fontRc;
+    textRc.setLeft(textRc.left() + 4);
+    painter.drawText(textRc, Qt::AlignCenter, "A");
+    pen = painter.pen();
+    pen.setWidth(4);
+    colorIndex = ColorTable::fontColorIndex;
+    if (colorIndex == 0) {
+        pen.setColor(Qt::black);
+    } else {
+        pen.setColor(ColorTable::getColor(colorIndex));
+    }
+
+    painter.fillRect(m_fontColorRightRect, getSelBrush(pt, m_fontColorRightRect));
+    painter.setPen(pen);
+    painter.drawLine(fontRc.left() + 8, fontRc.bottom() - 2, fontRc.left() + 22, fontRc.bottom() - 2);
+    QRect fontDownRc = m_fontColorRect;
+    fontDownRc.setLeft(m_fontColorRect.right() - 10);
+    fontDownRc.setTop(m_fontColorRect.top() + 4);
+    fontDownRc.setWidth(8);
+    fontDownRc.setHeight(16);
+
+    painter.drawPixmap(fontDownRc, m_dropdownPix, m_dropdownPix.rect());
+    painter.restore();
+
     painter.end();
 }
 
 void MindMapWidgetToolBar::mouseMoveEvent(QMouseEvent* event)
 {
     update();
+}
+
+void MindMapWidgetToolBar::setMindMapWidget(MindMapWidget* mindMapWidget)
+{
+    m_mindMapWidget = mindMapWidget;
+}
+
+void MindMapWidgetToolBar::mousePressEvent(QMouseEvent* event)
+{
+    QPoint pt = mapFromGlobal(cursor().pos());
+    if (m_fontBoldRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_BOLD);
+    } else if (m_fontItalicsRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_ITALICS);
+    } else if (m_underLineRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_UNDERLINE);
+    } else if (m_overLineRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_OVERLINE);
+    } else if (m_strikeOutRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_STRIKEOUT);
+    }
 }
 
 QBrush MindMapWidgetToolBar::getSelBrush(QPoint& pt, QRect& rc)
