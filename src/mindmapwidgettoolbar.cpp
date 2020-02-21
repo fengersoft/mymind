@@ -199,6 +199,14 @@ void MindMapWidgetToolBar::mousePressEvent(QMouseEvent* event)
         m_mindMapWidget->setNodeFontStyle(SET_OVERLINE);
     } else if (m_strikeOutRect.contains(pt)) {
         m_mindMapWidget->setNodeFontStyle(SET_STRIKEOUT);
+    } else if (m_fontBackColorLeftRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_FONT_BACKCOLOR);
+    } else if (m_fontBackColorRightRect.contains(pt)) {
+        m_mindMapWidget->showBackColorEditDialog();
+    } else if (m_fontColorLeftRect.contains(pt)) {
+        m_mindMapWidget->setNodeFontStyle(SET_FONT_COLOR);
+    } else if (m_fontColorRightRect.contains(pt)) {
+        m_mindMapWidget->showFontColorEditDialog();
     }
 }
 

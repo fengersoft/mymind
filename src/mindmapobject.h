@@ -12,6 +12,8 @@ const int SET_ITALICS = 1;
 const int SET_UNDERLINE = 2;
 const int SET_OVERLINE = 3;
 const int SET_STRIKEOUT = 4;
+const int SET_FONT_BACKCOLOR = 5;
+const int SET_FONT_COLOR = 6;
 class MindMapObject : public QObject {
     Q_OBJECT
 public:

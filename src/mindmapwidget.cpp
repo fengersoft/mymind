@@ -200,11 +200,11 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
                 painter.setPen(Qt::NoPen);
                 painter.setBrush(numColor(obj->sxh()));
                 QRect numRc;
-                numRc.setRect(fillRc.left() + 4, fillRc.top() + (fillRc.height() - 12) / 2, 12, 12);
+                numRc.setRect(fillRc.left() + 2, fillRc.top() + (fillRc.height() - 12) / 2, 12, 12);
                 painter.drawEllipse(numRc);
                 painter.setPen(Qt::white);
                 font = painter.font();
-                font.setBold(false);
+                setFontAsDefault(font);
                 font.setPointSize(9);
                 painter.setFont(font);
                 painter.drawText(numRc, Qt::AlignCenter, QString("%1").arg(obj->sxh()));
@@ -528,11 +528,6 @@ void MindMapWidget::showSelPopMenu()
               << "使用百度搜索\"" + m_selObject->name() + "\""
               << "复制文本"
               << "粘贴文本"
-              << "设置文字颜色"
-              << "设置文字背景"
-              << "应用上次文字颜色效果"
-              << "应用上次文字背景效果"
-              << "应用上次文字效果"
               << "添加空结点"
               << "添加剪贴板内容为结点"
               << "标记结点"
@@ -865,21 +860,38 @@ void MindMapWidget::setNodeFontStyle(int setType)
     if (m_selObject == nullptr) {
         return;
     }
-    bool b = m_selObject->value(setType);
-    m_selObject->setValue(setType, !b);
-    b = m_selObject->value(setType);
+
     QStringList fieldNames;
     fieldNames << "bold"
                << "italics"
                << "overline"
                << "underline"
-               << "strikeOut";
-    m_myDao->sqliteWrapper->execute(QString("update mind_data set %1=%2 "
-                                            "where id=%3")
+               << "strikeOut"
+               << "backColor";
+    if (setType <= 4) {
+        bool b = m_selObject->value(setType);
+        m_selObject->setValue(setType, !b);
+        b = m_selObject->value(setType);
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set %1=%2 "
+                                                "where id=%3")
 
-                                        .arg(fieldNames[setType])
-                                        .arg(b2i(b))
-                                        .arg(m_selObject->id()));
+                                            .arg(fieldNames[setType])
+                                            .arg(b2i(b))
+                                            .arg(m_selObject->id()));
+    } else if (setType == SET_FONT_BACKCOLOR) {
+        m_selObject->setBackColor(ColorTable::backColorIndex);
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set backcolor=%1 "
+                                                "where id=%2")
+                                            .arg(ColorTable::backColorIndex)
+                                            .arg(m_selObject->id()));
+    } else if (setType == SET_FONT_COLOR) {
+        m_selObject->setFontColor(ColorTable::fontColorIndex);
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set fontcolor=%1 "
+                                                "where id=%2")
+                                            .arg(ColorTable::fontColorIndex)
+                                            .arg(m_selObject->id()));
+    }
+
     update();
 }
 
@@ -898,6 +910,56 @@ void MindMapWidget::setNodeNameFont(MindMapObject* obj, QPainter& painter, QFont
     font.setStrikeOut(obj->strikOut());
     font.setPointSize(14);
     painter.setFont(font);
+}
+
+void MindMapWidget::setFontAsDefault(QFont& font)
+{
+
+    font.setItalic(false);
+    font.setUnderline(false);
+    font.setOverline(false);
+    font.setStrikeOut(false);
+    font.setBold(false);
+}
+
+void MindMapWidget::showBackColorEditDialog()
+{
+    EditColorDialog* dlg = new EditColorDialog();
+    int ret = dlg->exec();
+    if (ret == QDialog::Accepted) {
+        int color = dlg->colorIndex();
+        ColorTable::backColorIndex = color;
+        if (m_selObject != nullptr) {
+            m_selObject->setBackColor(color);
+
+            m_myDao->sqliteWrapper->execute(QString("update mind_data set backColor=%1 where id=%2")
+                                                .arg(color)
+                                                .arg(m_selObject->id()));
+        }
+
+        update();
+    }
+    delete dlg;
+}
+
+void MindMapWidget::showFontColorEditDialog()
+{
+    EditColorDialog* dlg = new EditColorDialog();
+    int ret = dlg->exec();
+    if (ret == QDialog::Accepted) {
+        int color = dlg->colorIndex();
+        ColorTable::fontColorIndex = color;
+        if (m_selObject != nullptr) {
+            m_selObject->setFontColor(color);
+
+            m_myDao->sqliteWrapper->execute(QString("update mind_data set fontColor=%1 where id=%2")
+                                                .arg(color)
+                                                .arg(m_selObject->id()));
+        }
+
+        update();
+    }
+    delete dlg;
 }
 
 void MindMapWidget::onPopMenuTrigger()
@@ -928,50 +990,6 @@ void MindMapWidget::onPopMenuTrigger()
         showEditMarkNodeDialog();
     } else if (act->text() == "复制文本") {
         qApp->clipboard()->setText(m_selObject->name());
-    } else if (act->text() == "设置文字颜色") {
-        EditColorDialog* dlg = new EditColorDialog();
-        int ret = dlg->exec();
-        if (ret == QDialog::Accepted) {
-            int color = dlg->colorIndex();
-            m_selObject->setFontColor(color);
-            ColorTable::fontColorIndex = color;
-            m_myDao->sqliteWrapper->execute(QString("update mind_data set fontColor=%1 where id=%2")
-                                                .arg(color)
-                                                .arg(m_selObject->id()));
-            update();
-        }
-        delete dlg;
-    } else if (act->text() == "应用上次文字颜色效果") {
-        if (m_selObject == nullptr) {
-            return;
-        }
-        int color = ColorTable::fontColorIndex;
-        m_selObject->setFontColor(color);
-        m_myDao->sqliteWrapper->execute(QString("update mind_data set fontColor=%1 where id=%2")
-                                            .arg(color)
-                                            .arg(m_selObject->id()));
-        update();
-    } else if (act->text() == "设置文字背景") {
-        EditColorDialog* dlg = new EditColorDialog();
-        int ret = dlg->exec();
-        if (ret == QDialog::Accepted) {
-            int color = dlg->colorIndex();
-            m_selObject->setBackColor(color);
-            ColorTable::backColorIndex = color;
-            m_myDao->sqliteWrapper->execute(QString("update mind_data set backColor=%1 where id=%2")
-                                                .arg(color)
-                                                .arg(m_selObject->id()));
-            update();
-        }
-        delete dlg;
-    } else if (act->text() == "应用上次文字背景效果") {
-
-        int color = ColorTable::backColorIndex;
-        m_selObject->setBackColor(color);
-        m_myDao->sqliteWrapper->execute(QString("update mind_data set backColor=%1 where id=%2")
-                                            .arg(color)
-                                            .arg(m_selObject->id()));
-        update();
     } else if (act->text() == "应用上次文字效果") {
         if (m_selObject == nullptr) {
             return;

@@ -78,6 +78,9 @@ public:
     void setNodeFontStyle(int setType);
     int b2i(bool b);
     void setNodeNameFont(MindMapObject* obj, QPainter& painter, QFont& font);
+    void setFontAsDefault(QFont& font);
+    void showBackColorEditDialog();
+    void showFontColorEditDialog();
 public slots:
     void onPopMenuTrigger();
 Q_SIGNALS:
