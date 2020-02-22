@@ -6,6 +6,7 @@
 #include "editnodedialog.h"
 #include "mindmapobject.h"
 #include "mydao.h"
+#include "searchandreplacedialog.h"
 #include "showmindlineoutdialog.h"
 #include <QApplication>
 #include <QClipboard>
@@ -24,7 +25,7 @@
 namespace Ui {
 class MindMapWidget;
 }
-
+class SearchAndReplaceDialog;
 class MindMapWidget : public QWidget {
     Q_OBJECT
 
@@ -44,6 +45,7 @@ public:
     void drawNode(int pid, int px, int py, int x, int y, QPainter& painter);
     void mousePressEvent(QMouseEvent* event);
     MindMapObject* selObject();
+    void setSelObject(MindMapObject* obj);
     int getNodeNeedCount(MindMapObject* pobj);
     void getMindWidgetChildNum(MindMapObject* pobj);
     void getMindWidgetsChildNum();
@@ -61,6 +63,7 @@ public:
     void showPopMenu();
     void releaseMouseFlag();
     void showEditMarkNodeDialog();
+    ///为结点增加图标
     void addMarkNodes(MindMapObject* obj);
     void saveDataAsPng();
     void drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHeight, int factor = 1);
@@ -81,6 +84,8 @@ public:
     void setFontAsDefault(QFont& font);
     void showBackColorEditDialog();
     void showFontColorEditDialog();
+    QList<MindMapObject*>& mindMapObjects();
+    MyDao* myDao();
 public slots:
     void onPopMenuTrigger();
 Q_SIGNALS:

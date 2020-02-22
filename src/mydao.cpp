@@ -1,4 +1,5 @@
 ﻿#include "mydao.h"
+#include "api/color/colortable.h"
 
 MyDao::MyDao(QObject* parent)
     : QObject(parent)
@@ -37,5 +38,29 @@ int MyDao::addNode(int pid, QString name, int sxh)
 void MyDao::editNode(int id, QString name)
 {
     QString sql = QString("update mind_data set name='%1' where id=%2").arg(name).arg(id);
+    sqliteWrapper->execute(sql);
+}
+
+void MyDao::initGlobalSet()
+{
+    QSqlQuery qry;
+    QString sql;
+    sql = "select * from mind_global";
+    sqliteWrapper->select(sql, qry);
+    if (!qry.next()) {
+        sql = QString("insert into mind_global(fontcolorindex,backcolorindex) values (%1,%2)").arg(0).arg(ColorTable::lastIndex());
+        sqliteWrapper->execute(sql);
+    }
+    sql = "select * from mind_global";
+    sqliteWrapper->select(sql, qry);
+    if (qry.next()) {
+        ColorTable::fontColorIndex = qry.value("fontcolorindex").toInt();
+        ColorTable::backColorIndex = qry.value("backcolorindex").toInt();
+    }
+}
+
+void MyDao::saveGlobalSet(QString fldName, int value)
+{
+    QString sql = QString("update mind_global set %1=%2").arg(fldName).arg(value);
     sqliteWrapper->execute(sql);
 }

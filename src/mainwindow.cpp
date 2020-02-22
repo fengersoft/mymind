@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     myDao = new MyDao(this);
+    myDao->initGlobalSet();
     mindMapWidget = new MindMapWidget(this);
 
     QHBoxLayout* lay = new QHBoxLayout();
@@ -161,8 +162,8 @@ void MainWindow::onMenuItemTriggered(bool checked)
         int ret = dlg->exec();
         if (ret == QDialog::Accepted) {
             mindMapWidget->setBackGroundId(dlg->bid());
-            myDao->sqliteWrapper->execute(QString("delete from mind_background where pid=%1").arg(mindMapWidget->projectId()));
-            myDao->sqliteWrapper->execute(QString("insert into mind_background (pid,bid) values (%1,%2)").arg(mindMapWidget->projectId()).arg(dlg->bid()));
+            myDao->sqliteWrapper->execute(QString("delete from mind_set where pid=%1").arg(mindMapWidget->projectId()));
+            myDao->sqliteWrapper->execute(QString("insert into mind_set (pid,bid) values (%1,%2)").arg(mindMapWidget->projectId()).arg(dlg->bid()));
         }
         delete dlg;
     } else if (act->text() == "查看导图大纲") {

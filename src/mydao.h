@@ -15,6 +15,9 @@ public:
     SqliteWrapper* sqliteWrapper;
     int addNode(int pid, QString name, int sxh);
     void editNode(int id, QString name);
+    ///初始化一些设置
+    void initGlobalSet();
+    void saveGlobalSet(QString fldName, int value);
 signals:
 
 public slots:

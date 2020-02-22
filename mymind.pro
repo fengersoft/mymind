@@ -35,6 +35,7 @@ SOURCES += \
     src/mydao.cpp \
     src/openprojectdialog.cpp \
     src/openrecentdialog.cpp \
+    src/searchandreplacedialog.cpp \
     src/setbackgrounddialog.cpp \
     src/showmindlineoutdialog.cpp
 
@@ -57,6 +58,7 @@ HEADERS += \
     src/mydao.h \
     src/openprojectdialog.h \
     src/openrecentdialog.h \
+    src/searchandreplacedialog.h \
     src/setbackgrounddialog.h \
     src/showmindlineoutdialog.h
 
@@ -73,6 +75,7 @@ FORMS += \
     src/mindmapwidgettoolbar.ui \
     src/openprojectdialog.ui \
     src/openrecentdialog.ui \
+    src/searchandreplacedialog.ui \
     src/setbackgrounddialog.ui \
     src/showmindlineoutdialog.ui
 

@@ -343,6 +343,12 @@ MindMapObject* MindMapWidget::selObject()
     return m_selObject;
 }
 
+void MindMapWidget::setSelObject(MindMapObject* obj)
+{
+    m_selObject = obj;
+    update();
+}
+
 int MindMapWidget::getNodeNeedCount(MindMapObject* pobj)
 {
     int n = 1;
@@ -536,7 +542,6 @@ void MindMapWidget::showSelPopMenu()
               << "上移结点"
               << "下移结点"
               << "删除结点"
-              << "开始截图"
               << "设置下级结点编号";
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
@@ -573,7 +578,8 @@ void MindMapWidget::showPopMenu()
     QMenu* menu = new QMenu(this);
     QStringList menuNames;
     menuNames
-        << "开始截图";
+        << "开始截图"
+        << "查找和替换";
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
             if (m_selObject->link().trimmed() == "") {
@@ -929,6 +935,7 @@ void MindMapWidget::showBackColorEditDialog()
     if (ret == QDialog::Accepted) {
         int color = dlg->colorIndex();
         ColorTable::backColorIndex = color;
+        m_myDao->saveGlobalSet("backcolorindex", color);
         if (m_selObject != nullptr) {
             m_selObject->setBackColor(color);
 
@@ -948,6 +955,7 @@ void MindMapWidget::showFontColorEditDialog()
     int ret = dlg->exec();
     if (ret == QDialog::Accepted) {
         int color = dlg->colorIndex();
+        m_myDao->saveGlobalSet("fontcolorindex", color);
         ColorTable::fontColorIndex = color;
         if (m_selObject != nullptr) {
             m_selObject->setFontColor(color);
@@ -960,6 +968,16 @@ void MindMapWidget::showFontColorEditDialog()
         update();
     }
     delete dlg;
+}
+
+QList<MindMapObject*>& MindMapWidget::mindMapObjects()
+{
+    return m_mindMapObjects;
+}
+
+MyDao* MindMapWidget::myDao()
+{
+    return m_myDao;
 }
 
 void MindMapWidget::onPopMenuTrigger()
@@ -1054,6 +1072,10 @@ void MindMapWidget::onPopMenuTrigger()
         int shownum = m_selObject->showNum() == true ? 1 : 0;
         m_myDao->sqliteWrapper->execute(QString("update mind_data set shownum=%1 where id=%2").arg(shownum).arg(m_selObject->id()));
         update();
+    } else if (act->text() == "查找和替换") {
+        SearchAndReplaceDialog* dlg = new SearchAndReplaceDialog();
+        dlg->setMindMapWidget(this);
+        dlg->exec();
     }
 }
 
@@ -1075,7 +1097,7 @@ int MindMapWidget::getMaxLen(QStringList& stl)
 void MindMapWidget::loadBackground()
 {
     QSqlQuery qry;
-    m_myDao->sqliteWrapper->select(QString("select bid from mind_background where pid=%1").arg(m_projectId), qry);
+    m_myDao->sqliteWrapper->select(QString("select bid from mind_set where pid=%1").arg(m_projectId), qry);
     if (qry.next()) {
         m_backgroundId = qry.value(0).toInt();
     } else {
