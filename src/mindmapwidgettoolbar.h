@@ -35,9 +35,13 @@ private:
     QRect m_fontColorRect;
     QRect m_fontColorLeftRect;
     QRect m_fontColorRightRect;
+    QRect m_strewRect;
+    QRect m_strewApplyRect;
     QPixmap m_dropdownPix;
+    QPixmap m_pickerPix;
     QBrush getSelBrush(QPoint& pt, QRect& rc);
     QPen getSelPen(QPoint& pt, QRect& rc);
+    QBrush getBkBrush();
     MindMapWidget* m_mindMapWidget;
 };
 

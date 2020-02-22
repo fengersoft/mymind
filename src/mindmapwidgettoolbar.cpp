@@ -18,8 +18,10 @@ MindMapWidgetToolBar::MindMapWidgetToolBar(QWidget* parent)
     m_fontColorRect.setRect(m_fontBackColorRect.right() + 4, 4, 36, 24);
     m_fontColorLeftRect.setRect(m_fontBackColorRect.right() + 4, 4, 24, 24);
     m_fontColorRightRect.setRect(m_fontColorLeftRect.right() + 1, 4, 12, 24);
-
+    m_strewRect.setRect(m_fontColorRect.right() + 4, 4, 24, 24);
+    m_strewApplyRect.setRect(m_strewRect.right() + 4, 4, 24, 24);
     m_dropdownPix = QPixmap(":/res/toolbar/dropdown.png");
+    m_pickerPix = QPixmap(":/res/toolbar/picker.png");
 }
 
 MindMapWidgetToolBar::~MindMapWidgetToolBar()
@@ -173,6 +175,45 @@ void MindMapWidgetToolBar::paintEvent(QPaintEvent* event)
     painter.drawPixmap(fontDownRc, m_dropdownPix, m_dropdownPix.rect());
     painter.restore();
 
+    //吸管工具
+    painter.save();
+    painter.setBrush(getSelBrush(pt, m_strewRect));
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(m_strewRect);
+    QRect textBkRc;
+    textBkRc.setRect(m_strewRect.left() + 2, m_strewRect.top() + 2,
+        m_strewRect.width() - 4, m_strewRect.height() - 4);
+    painter.fillRect(textBkRc, getBkBrush());
+    QRect pickerRc;
+    pickerRc.setRect(m_strewRect.right() - 8, m_strewRect.bottom() - 8, 8, 8);
+    painter.drawPixmap(pickerRc, m_pickerPix, m_pickerPix.rect());
+    painter.setPen(ColorTable::getColor(ColorTable::fontColorIndex));
+    font = painter.font();
+    font.setPointSize(14);
+    font.setBold(true);
+    painter.setFont(font);
+    painter.drawText(m_strewRect, Qt::AlignCenter, "Sr");
+
+    painter.restore();
+
+    //绘制画刷应用按钮
+    painter.save();
+    painter.setBrush(getSelBrush(pt, m_strewApplyRect));
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(m_strewApplyRect);
+    QRect textApplyBkRc;
+    textApplyBkRc.setRect(m_strewApplyRect.left() + 2, m_strewApplyRect.top() + 2,
+        m_strewApplyRect.width() - 4, m_strewApplyRect.height() - 4);
+    painter.fillRect(textApplyBkRc, getBkBrush());
+
+    painter.setPen(ColorTable::getColor(ColorTable::fontColorIndex));
+    font = painter.font();
+    font.setPointSize(17);
+    font.setBold(true);
+    painter.setFont(font);
+    painter.drawText(m_strewApplyRect, Qt::AlignCenter, "Sr");
+
+    painter.restore();
     painter.end();
 }
 
@@ -207,6 +248,10 @@ void MindMapWidgetToolBar::mousePressEvent(QMouseEvent* event)
         m_mindMapWidget->setNodeFontStyle(SET_FONT_COLOR);
     } else if (m_fontColorRightRect.contains(pt)) {
         m_mindMapWidget->showFontColorEditDialog();
+    } else if (m_strewRect.contains(pt)) {
+        m_mindMapWidget->setFontStyle();
+    } else if (m_strewApplyRect.contains(pt)) {
+        m_mindMapWidget->applyFontStyle();
     }
 }
 
@@ -225,5 +270,14 @@ QPen MindMapWidgetToolBar::getSelPen(QPoint& pt, QRect& rc)
         return QPen(QColor(197, 197, 197));
     } else {
         return QPen(Qt::NoPen);
+    }
+}
+
+QBrush MindMapWidgetToolBar::getBkBrush()
+{
+    if (ColorTable::backColorIndex == ColorTable::lastIndex()) {
+        return QBrush(Qt::NoBrush);
+    } else {
+        return QBrush(ColorTable::getColor(ColorTable::backColorIndex));
     }
 }

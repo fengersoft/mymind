@@ -79,6 +79,8 @@ public:
     void getSelectRect(QRect& rc, QPoint pt1, QPoint pt2);
     QColor numColor(int sxh);
     void setNodeFontStyle(int setType);
+    void setFontStyle();
+    void applyFontStyle();
     int b2i(bool b);
     void setNodeNameFont(MindMapObject* obj, QPainter& painter, QFont& font);
     void setFontAsDefault(QFont& font);

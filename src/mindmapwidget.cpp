@@ -901,6 +901,32 @@ void MindMapWidget::setNodeFontStyle(int setType)
     update();
 }
 
+void MindMapWidget::setFontStyle()
+{
+    if (m_selObject == nullptr) {
+        return;
+    }
+    ColorTable::fontColorIndex = m_selObject->fontColor();
+    ColorTable::backColorIndex = m_selObject->backColor();
+    m_myDao->saveGlobalSet("fontcolorindex", ColorTable::fontColorIndex);
+    m_myDao->saveGlobalSet("backcolorindex", ColorTable::backColorIndex);
+}
+
+void MindMapWidget::applyFontStyle()
+{
+    if (m_selObject == nullptr) {
+        return;
+    }
+    m_selObject->setFontColor(ColorTable::fontColorIndex);
+    m_selObject->setBackColor(ColorTable::backColorIndex);
+    m_myDao->sqliteWrapper->execute(QString("update mind_data set fontColor=%1 where id=%2")
+                                        .arg(ColorTable::fontColorIndex)
+                                        .arg(m_selObject->id()));
+    m_myDao->sqliteWrapper->execute(QString("update mind_data set backcolor=%1 where id=%2")
+                                        .arg(ColorTable::backColorIndex)
+                                        .arg(m_selObject->id()));
+}
+
 int MindMapWidget::b2i(bool b)
 {
     return b == true ? 1 : 0;

@@ -39,5 +39,6 @@
         <file>res/background/10.jpg</file>
         <file>res/app.png</file>
         <file>res/toolbar/dropdown.png</file>
+        <file>res/toolbar/picker.png</file>
     </qresource>
 </RCC>
