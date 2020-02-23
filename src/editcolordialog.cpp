@@ -43,6 +43,7 @@ EditColorDialog::~EditColorDialog()
 int EditColorDialog::colorIndex()
 {
     ColorTable::addColorIndex(m_colorIndex);
+    emit onAddColorIndex(m_colorIndex);
     return m_colorIndex;
 }
 

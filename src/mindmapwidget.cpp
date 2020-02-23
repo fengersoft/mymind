@@ -957,6 +957,7 @@ void MindMapWidget::setFontAsDefault(QFont& font)
 void MindMapWidget::showBackColorEditDialog()
 {
     EditColorDialog* dlg = new EditColorDialog();
+    connect(dlg, &EditColorDialog::onAddColorIndex, this, &MindMapWidget::onAddColorIndex);
     int ret = dlg->exec();
     if (ret == QDialog::Accepted) {
         int color = dlg->colorIndex();
@@ -978,6 +979,7 @@ void MindMapWidget::showBackColorEditDialog()
 void MindMapWidget::showFontColorEditDialog()
 {
     EditColorDialog* dlg = new EditColorDialog();
+    connect(dlg, &EditColorDialog::onAddColorIndex, this, &MindMapWidget::onAddColorIndex);
     int ret = dlg->exec();
     if (ret == QDialog::Accepted) {
         int color = dlg->colorIndex();
@@ -1103,6 +1105,12 @@ void MindMapWidget::onPopMenuTrigger()
         dlg->setMindMapWidget(this);
         dlg->exec();
     }
+}
+
+void MindMapWidget::onAddColorIndex(int colorIndex)
+{
+    QString sql = QString("insert into mind_color(colorindex) values (%1)").arg(colorIndex);
+    m_myDao->sqliteWrapper->execute(sql);
 }
 
 int MindMapWidget::getMaxLen(QStringList& stl)

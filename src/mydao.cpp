@@ -57,6 +57,19 @@ void MyDao::initGlobalSet()
         ColorTable::fontColorIndex = qry.value("fontcolorindex").toInt();
         ColorTable::backColorIndex = qry.value("backcolorindex").toInt();
     }
+    //获取颜色
+    sql = "select * from mind_color order by id desc";
+    sqliteWrapper->select(sql, qry);
+    int i = 0;
+    while (qry.next()) {
+        if (!ColorTable::colorIndexes.contains(qry.value("colorindex").toInt())) {
+            ColorTable::colorIndexes.push(qry.value("colorindex").toInt());
+            i++;
+            if (i > 10) {
+                break;
+            }
+        }
+    }
 }
 
 void MyDao::saveGlobalSet(QString fldName, int value)

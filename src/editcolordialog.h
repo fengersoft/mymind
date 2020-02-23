@@ -18,6 +18,8 @@ public:
     explicit EditColorDialog(QWidget* parent = nullptr);
     ~EditColorDialog();
     int colorIndex();
+signals:
+    void onAddColorIndex(int colorIndex);
 private slots:
     void on_btnCancel_clicked();
 

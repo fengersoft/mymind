@@ -90,6 +90,7 @@ public:
     MyDao* myDao();
 public slots:
     void onPopMenuTrigger();
+    void onAddColorIndex(int colorIndex);
 Q_SIGNALS:
     void onDoubleClick();
 
