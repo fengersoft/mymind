@@ -10,6 +10,7 @@
 #include "showmindlineoutdialog.h"
 #include <QApplication>
 #include <QClipboard>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QElapsedTimer>
 #include <QEventLoop>
@@ -88,6 +89,7 @@ public:
     void setFontAsDefault(QFont& font);
     void showBackColorEditDialog();
     void showFontColorEditDialog();
+    void saveMindMapAsNewProject();
     QList<MindMapObject*>& mindMapObjects();
     MyDao* myDao();
 public slots:

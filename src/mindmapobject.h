@@ -58,6 +58,8 @@ public:
     bool strikOut();
     bool value(int setType);
     void setValue(int setType, bool value);
+    MindMapObject* newObj();
+    MindMapObject* srcObj();
 
 private:
     int m_pid;
@@ -77,6 +79,8 @@ private:
     bool m_overline;
     bool m_underline;
     bool m_strikeOut;
+    MindMapObject* m_newObj;
+    MindMapObject* m_srcObj;
 signals:
 
 public slots:

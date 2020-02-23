@@ -3,6 +3,7 @@
 MindMapObject::MindMapObject(QObject* parent)
     : QObject(parent)
 {
+
     m_parentObj = nullptr;
     static QColor colors[12] = { QColor(229, 77, 66), QColor(243, 123, 29), QColor(251, 189, 8),
         QColor(141, 198, 63), QColor(57, 181, 74), QColor(28, 187, 180), QColor(0, 129, 255),
@@ -14,6 +15,8 @@ MindMapObject::MindMapObject(QObject* parent)
     m_fontColor = 0;
     m_backColor = ColorTable::lastIndex();
     m_showNum = false;
+    m_newObj = nullptr;
+    m_srcObj = nullptr;
 }
 
 void MindMapObject::setPid(int pid)
@@ -109,6 +112,9 @@ int MindMapObject::backColor()
 
 MindMapObject::~MindMapObject()
 {
+    if (m_newObj != nullptr) {
+        delete m_newObj;
+    }
 }
 
 void MindMapObject::setSxh(int sxh)
@@ -194,6 +200,20 @@ void MindMapObject::setValue(int setType, bool value)
     } else if (setType == SET_STRIKEOUT) {
         setStrikeOut(value);
     }
+}
+
+MindMapObject* MindMapObject::newObj()
+{
+    if (m_newObj == nullptr) {
+        m_newObj = new MindMapObject(nullptr);
+        m_newObj->m_srcObj = this;
+    }
+    return m_newObj;
+}
+
+MindMapObject* MindMapObject::srcObj()
+{
+    return m_srcObj;
 }
 
 bool MindMapObject::value(int setType)

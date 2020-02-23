@@ -143,3 +143,14 @@ QSqlDatabase& SqliteWrapper::getDataBase()
 {
     return database;
 }
+
+int SqliteWrapper::getMaxId(QString tableName)
+{
+    QString sql = "select max(id) from " + tableName;
+    QSqlQuery qry;
+    select(sql, qry);
+    if (qry.next()) {
+        return qry.value(0).toInt();
+    }
+    return 0;
+}

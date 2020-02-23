@@ -132,6 +132,7 @@ void MainWindow::on_btnMenu_clicked()
               << "导出导图为图片"
               << "导出导图为Markdown"
               << "导出导图为txt文件"
+              << "保存导图为新导图"
               << "关于导图";
     for (int i = 0; i < menuNames.count(); i++) {
         QAction* act = new QAction(menu);
@@ -160,6 +161,8 @@ void MainWindow::onMenuItemTriggered(bool checked)
         mindMapWidget->saveDataAsMarkdown();
     } else if (act->text() == "导出导图为txt文件") {
         mindMapWidget->saveDataAsTxtFile();
+    } else if (act->text() == "保存导图为新导图") {
+        mindMapWidget->saveMindMapAsNewProject();
     } else if (act->text() == "设置导图背景") {
         if (mindMapWidget->projectId() == -1) {
             return;

@@ -30,6 +30,7 @@ public:
     bool execute(QString sql);
     void truncateTables(QStringList& tables);
     QSqlDatabase& getDataBase();
+    int getMaxId(QString tableName);
 
 private:
     QString fileName;

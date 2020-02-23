@@ -1040,6 +1040,57 @@ void MindMapWidget::showFontColorEditDialog()
     delete dlg;
 }
 
+void MindMapWidget::saveMindMapAsNewProject()
+{
+    QString sql;
+    int mpid;
+    for (int i = 0; i < m_mindMapObjects.count(); i++) {
+        MindMapObject* oldObj = m_mindMapObjects.at(i);
+        sql = QString("insert into mind_data(name,remark,fontcolor,backcolor,sxh,shownum,bold,italics,"
+                      "underline,overline,strikeOut) select name,remark,fontcolor,backcolor,sxh,shownum,bold,italics,"
+                      "underline,overline,strikeOut from mind_data where id=%1")
+                  .arg(oldObj->id());
+        m_myDao->sqliteWrapper->execute(sql);
+        int maxId = m_myDao->sqliteWrapper->getMaxId("mind_data");
+        MindMapObject* newObj = oldObj->newObj();
+        newObj->setId(maxId);
+        if (oldObj->pid() == -1) {
+            mpid = maxId;
+            newObj->setPid(-1);
+            m_myDao->sqliteWrapper->execute(QString("update mind_data set pid=-1 where id=%1").arg(maxId));
+            QDateTime d = QDateTime::currentDateTime();
+            QString s = oldObj->name() + d.toString("副本yyyyMMddhhmmss");
+            sql = QString("update mind_data set name='%1' where id=%2")
+                      .arg(s)
+                      .arg(maxId);
+            qDebug() << sql;
+            m_myDao->sqliteWrapper->execute(sql);
+        }
+    }
+    for (int i = 0; i < m_mindMapObjects.count(); i++) {
+        MindMapObject* oldObj = m_mindMapObjects.at(i);
+        MindMapObject* newObj = oldObj->newObj();
+        if (newObj->pid() != -1) {
+            int pid = newObj->srcObj()->parentObj()->newObj()->id();
+            sql = QString("update mind_data set pid=%1 where id=%2").arg(pid).arg(newObj->id());
+            m_myDao->sqliteWrapper->execute(sql);
+            newObj->setPid(pid);
+        }
+    }
+    for (int i = 0; i < m_mindMapObjects.count(); i++) {
+        MindMapObject* oldObj = m_mindMapObjects.at(i);
+        MindMapObject* newObj = oldObj->newObj();
+        sql = QString("insert into mind_flag(pid,flag) "
+                      "select %1 as pid,flag from mind_flag where pid=%2")
+                  .arg(newObj->id())
+                  .arg(oldObj->id());
+        m_myDao->sqliteWrapper->execute(sql);
+    }
+    sql = QString("insert into mind_set(pid,bid) values (%1,%2)").arg(mpid).arg(m_backgroundId);
+    m_myDao->sqliteWrapper->execute(sql);
+    openProject(mpid);
+}
+
 QList<MindMapObject*>& MindMapWidget::mindMapObjects()
 {
     return m_mindMapObjects;
