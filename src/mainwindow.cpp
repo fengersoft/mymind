@@ -130,6 +130,8 @@ void MainWindow::on_btnMenu_clicked()
               << "删除导图"
               << "设置导图背景"
               << "导出导图为图片"
+              << "导出导图为Markdown"
+              << "导出导图为txt文件"
               << "关于导图";
     for (int i = 0; i < menuNames.count(); i++) {
         QAction* act = new QAction(menu);
@@ -154,6 +156,10 @@ void MainWindow::onMenuItemTriggered(bool checked)
         openRecentProject();
     } else if (act->text() == "导出导图为图片") {
         mindMapWidget->saveDataAsPng();
+    } else if (act->text() == "导出导图为Markdown") {
+        mindMapWidget->saveDataAsMarkdown();
+    } else if (act->text() == "导出导图为txt文件") {
+        mindMapWidget->saveDataAsTxtFile();
     } else if (act->text() == "设置导图背景") {
         if (mindMapWidget->projectId() == -1) {
             return;

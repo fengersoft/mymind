@@ -660,6 +660,42 @@ void MindMapWidget::saveDataAsPng()
     delete img;
 }
 
+void MindMapWidget::saveDataAsMarkdown()
+{
+    QString path = QFileDialog::getSaveFileName(this, "导出为Markdown", "导出.md", "Markdown文件(*.md)");
+    if (path == "") {
+        return;
+    }
+    QStringList infos;
+    showMindLineOutInfo(-1, "", infos, "#");
+    QFile file(path);
+    file.open(QIODevice::WriteOnly);
+    QTextStream stm(&file);
+    for (int i = 0; i < infos.count(); i++) {
+        stm << infos[i] + "\n";
+    }
+    file.flush();
+    file.close();
+}
+
+void MindMapWidget::saveDataAsTxtFile()
+{
+    QString path = QFileDialog::getSaveFileName(this, "导出为txt文件", "导出.txt", "txt文件(*.txt)");
+    if (path == "") {
+        return;
+    }
+    QStringList infos;
+    showMindLineOutInfo(-1, "", infos, "");
+    QFile file(path);
+    file.open(QIODevice::WriteOnly);
+    QTextStream stm(&file);
+    for (int i = 0; i < infos.count(); i++) {
+        stm << infos[i] + "\n";
+    }
+    file.flush();
+    file.close();
+}
+
 void MindMapWidget::drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHeight, int factor)
 {
     getMindWidgetsChildNum();
@@ -822,13 +858,19 @@ void MindMapWidget::showMindLineOut()
     delete dlg;
 }
 
-void MindMapWidget::showMindLineOutInfo(int pid, QString prefix, QStringList& infos)
+void MindMapWidget::showMindLineOutInfo(int pid, QString prefix, QStringList& infos, QString sign, QString space)
 {
     for (int i = 0; i < m_mindMapObjects.count(); i++) {
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (obj->pid() == pid) {
-            infos << prefix + "·" + obj->name();
-            showMindLineOutInfo(obj->id(), prefix + "    ", infos);
+            if (sign == "#") {
+                infos << prefix + sign + " " + space + obj->name();
+                infos << "\n";
+                showMindLineOutInfo(obj->id(), prefix + "#", infos, sign, space + "&emsp;&emsp;");
+            } else {
+                infos << prefix + sign + obj->name();
+                showMindLineOutInfo(obj->id(), prefix + "    ", infos, sign);
+            }
         }
     }
 }

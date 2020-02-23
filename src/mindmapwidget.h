@@ -66,6 +66,8 @@ public:
     ///为结点增加图标
     void addMarkNodes(MindMapObject* obj);
     void saveDataAsPng();
+    void saveDataAsMarkdown();
+    void saveDataAsTxtFile();
     void drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHeight, int factor = 1);
     void getDrawRect(int& w, int& h);
     void reSetOrder(int pid);
@@ -75,7 +77,7 @@ public:
     void onAddChildNodeEvent(QString name);
     int getNewMaxSxh(int pid);
     void showMindLineOut();
-    void showMindLineOutInfo(int pid, QString prefix, QStringList& infos);
+    void showMindLineOutInfo(int pid, QString prefix, QStringList& infos, QString sign = "·", QString space = "");
     void getSelectRect(QRect& rc, QPoint pt1, QPoint pt2);
     QColor numColor(int sxh);
     void setNodeFontStyle(int setType);
