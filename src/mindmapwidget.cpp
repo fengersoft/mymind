@@ -243,13 +243,15 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             //绘制图片
             if (obj->hasImg()) {
                 QPixmap pix = obj->img();
-                QPixmap tmpPix = pix.scaled(rc.width() - 16, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                QRect pixRc;
-                pixRc.setRect(textRc.left() - 16, textRc.bottom() + 16, tmpPix.width(), tmpPix.height());
-                painter.drawPixmap(pixRc, tmpPix, tmpPix.rect());
-                painter.setBrush(Qt::NoBrush);
-                painter.setPen(QColor(197, 197, 197));
-                painter.drawRect(pixRc);
+                if (!pix.isNull()) {
+                    QPixmap tmpPix = pix.scaled(rc.width() - 16, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                    QRect pixRc;
+                    pixRc.setRect(textRc.left() - 16, textRc.bottom() + 16, tmpPix.width(), tmpPix.height());
+                    painter.drawPixmap(pixRc, tmpPix, tmpPix.rect());
+                    painter.setBrush(Qt::NoBrush);
+                    painter.setPen(QColor(197, 197, 197));
+                    painter.drawRect(pixRc);
+                }
             }
             pen = painter.pen();
             pen.setWidth(3);
