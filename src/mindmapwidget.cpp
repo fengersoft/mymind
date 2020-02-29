@@ -92,7 +92,7 @@ void MindMapWidget::addNode(int pid, int id)
     if (pid == -1) {
         MindMapObject* obj = new MindMapObject(this);
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut from mind_data where id=%1 order by sxh,id").arg(id);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img from mind_data where id=%1 order by sxh,id").arg(id);
         m_myDao->sqliteWrapper->select(sql, qry);
         qry.next();
         addNodeInfo(obj, 1, qry);
@@ -102,7 +102,7 @@ void MindMapWidget::addNode(int pid, int id)
     } else {
 
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut from mind_data where pid=%1  order by sxh,id").arg(pid);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img from mind_data where pid=%1  order by sxh,id").arg(pid);
         m_myDao->sqliteWrapper->select(sql, qry);
         i = 1;
         while (qry.next()) {
@@ -136,7 +136,15 @@ void MindMapWidget::addNodeInfo(MindMapObject* obj, int i, QSqlQuery& qry)
     obj->setOverline(getQryValueBool(qry, "overline"));
     obj->setUnderline(getQryValueBool(qry, "underline"));
     obj->setStrikeOut(getQryValueBool(qry, "strikeOut"));
-
+    obj->setHasImg(qry.value("img").isNull() == false);
+    if (!qry.value("img").isNull()) {
+        QByteArray ba = qry.value("img").toByteArray();
+        QBuffer buf(&ba);
+        QImage img;
+        img.load(&buf, "png");
+        QPixmap pix = QPixmap::fromImage(img);
+        obj->setImg(pix);
+    }
     addMarkNodes(obj);
     bool showNum = ((qry.value("shownum").isNull()) || (qry.value("showNum").toInt() == 0)) ? false : true;
     obj->setShowNum(showNum);
@@ -232,6 +240,17 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
                 painter.drawPixmap(mRc, mPix, mPix.rect());
                 markNodeLeft += 16;
             }
+            //绘制图片
+            if (obj->hasImg()) {
+                QPixmap pix = obj->img();
+                QPixmap tmpPix = pix.scaled(rc.width() - 16, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                QRect pixRc;
+                pixRc.setRect(textRc.left() - 16, textRc.bottom() + 16, tmpPix.width(), tmpPix.height());
+                painter.drawPixmap(pixRc, tmpPix, tmpPix.rect());
+                painter.setBrush(Qt::NoBrush);
+                painter.setPen(QColor(197, 197, 197));
+                painter.drawRect(pixRc);
+            }
             pen = painter.pen();
             pen.setWidth(3);
             MindMapObject* pobj = obj->parentObj();
@@ -244,7 +263,7 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             painter.setPen(pen);
             painter.drawLine(rc.left(), rc.bottom() + 1, rc.right(), rc.bottom() + 1);
 
-            m += n;
+            m += n + (obj->hasImg() ? 132 : 0);
             if (pid != -1) {
                 QPainterPath path;
                 painter.setBrush(Qt::NoBrush);
@@ -395,6 +414,9 @@ void MindMapWidget::getNodeCount(MindMapObject* pobj, int& n)
             if (obj->childNum == 0) {
                 n++;
             }
+            if (obj->hasImg()) {
+                n += 4;
+            }
             getNodeCount(obj, n);
         }
     }
@@ -534,6 +556,8 @@ void MindMapWidget::showSelPopMenu()
               << "使用百度搜索\"" + m_selObject->name() + "\""
               << "复制文本"
               << "粘贴文本"
+              << "添加剪贴板图片"
+              << "删除图片"
               << "添加空结点"
               << "添加剪贴板内容为结点"
               << "标记结点"
@@ -558,6 +582,10 @@ void MindMapWidget::showSelPopMenu()
             }
         } else if (menuNames[i] == "添加剪贴板内容为结点") {
             if (qApp->clipboard()->text() == "") {
+                continue;
+            }
+        } else if (menuNames[i] == "删除图片") {
+            if (m_selObject->hasImg() == false) {
                 continue;
             }
         }
@@ -1181,6 +1209,26 @@ void MindMapWidget::onPopMenuTrigger()
         }
         m_selObject->setName(text);
         m_myDao->editNode(m_selObject->id(), text);
+        update();
+    } else if (act->text() == "添加剪贴板图片") {
+        if (m_selObject == nullptr) {
+            return;
+        }
+        QPixmap pix = qApp->clipboard()->pixmap();
+        if (!pix.isNull()) {
+            m_selObject->setImg(pix);
+            m_selObject->setHasImg(true);
+            m_myDao->addPix(m_selObject->id(), pix);
+            update();
+        }
+    } else if (act->text() == "删除图片") {
+        if (m_selObject == nullptr) {
+            return;
+        }
+        m_selObject->setHasImg(false);
+        QPixmap pix = QPixmap();
+        m_selObject->setImg(pix);
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set img=null where id=%1").arg(m_selObject->id()));
         update();
     } else if (act->text() == "添加空结点") {
         onAddChildNodeEvent("");

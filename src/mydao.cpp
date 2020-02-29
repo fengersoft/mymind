@@ -77,3 +77,16 @@ void MyDao::saveGlobalSet(QString fldName, int value)
     QString sql = QString("update mind_global set %1=%2").arg(fldName).arg(value);
     sqliteWrapper->execute(sql);
 }
+
+void MyDao::addPix(int id, QPixmap& pix)
+{
+    QString sql = QString("update mind_data set img=? where id=%1").arg(id);
+    QSqlQuery qry;
+    sqliteWrapper->prepare(sql, qry);
+    QByteArray ba;
+    QBuffer buf(&ba);
+    QImage img = pix.toImage();
+    img.save(&buf, "png");
+    qry.bindValue(0, ba);
+    qry.exec();
+}

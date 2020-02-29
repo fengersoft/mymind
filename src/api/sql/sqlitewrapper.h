@@ -31,6 +31,7 @@ public:
     void truncateTables(QStringList& tables);
     QSqlDatabase& getDataBase();
     int getMaxId(QString tableName);
+    void prepare(QString sql, QSqlQuery& qry);
 
 private:
     QString fileName;

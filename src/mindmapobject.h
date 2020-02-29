@@ -4,6 +4,7 @@
 #include "api/color/colortable.h"
 #include <QColor>
 #include <QObject>
+#include <QPixmap>
 #include <QRect>
 #include <QSet>
 #include <QtDebug>
@@ -60,6 +61,10 @@ public:
     void setValue(int setType, bool value);
     MindMapObject* newObj();
     MindMapObject* srcObj();
+    void setHasImg(bool hasImg);
+    bool hasImg();
+    void setImg(QPixmap& img);
+    QPixmap& img();
 
 private:
     int m_pid;
@@ -81,6 +86,8 @@ private:
     bool m_strikeOut;
     MindMapObject* m_newObj;
     MindMapObject* m_srcObj;
+    bool m_hasImg;
+    QPixmap m_img;
 signals:
 
 public slots:

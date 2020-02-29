@@ -216,6 +216,26 @@ MindMapObject* MindMapObject::srcObj()
     return m_srcObj;
 }
 
+void MindMapObject::setHasImg(bool hasImg)
+{
+    m_hasImg = hasImg;
+}
+
+bool MindMapObject::hasImg()
+{
+    return m_hasImg;
+}
+
+void MindMapObject::setImg(QPixmap& img)
+{
+    m_img = img;
+}
+
+QPixmap& MindMapObject::img()
+{
+    return m_img;
+}
+
 bool MindMapObject::value(int setType)
 {
     if (setType == SET_BOLD) {

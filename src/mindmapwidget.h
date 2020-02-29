@@ -9,6 +9,7 @@
 #include "searchandreplacedialog.h"
 #include "showmindlineoutdialog.h"
 #include <QApplication>
+#include <QBuffer>
 #include <QClipboard>
 #include <QDateTime>
 #include <QDesktopServices>

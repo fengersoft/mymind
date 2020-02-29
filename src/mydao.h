@@ -3,6 +3,7 @@
 
 #include "api/sql/sqlitewrapper.h"
 #include <QApplication>
+#include <QBuffer>
 #include <QFileInfo>
 #include <QObject>
 #include <QSqlQuery>
@@ -18,6 +19,7 @@ public:
     ///初始化一些设置
     void initGlobalSet();
     void saveGlobalSet(QString fldName, int value);
+    void addPix(int id, QPixmap& pix);
 signals:
 
 public slots:

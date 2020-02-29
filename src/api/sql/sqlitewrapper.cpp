@@ -154,3 +154,9 @@ int SqliteWrapper::getMaxId(QString tableName)
     }
     return 0;
 }
+
+void SqliteWrapper::prepare(QString sql, QSqlQuery& qry)
+{
+    qry = QSqlQuery(database);
+    qry.prepare(sql);
+}
