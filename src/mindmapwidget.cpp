@@ -608,7 +608,7 @@ void MindMapWidget::showPopMenu()
     QMenu* menu = new QMenu(this);
     QStringList menuNames;
     menuNames
-        << "开始截图"
+        << "开始截取本窗口"
         << "查找和替换";
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
@@ -747,32 +747,37 @@ void MindMapWidget::drawImage(QPaintDevice* paintDevice, int imgWidth, int imgHe
     int y = m_rootPoint.y();
     drawNode(-1, x, y, x, y, painter);
     drawRemark(painter);
-    if ((m_screenshotFlag == true) && (m_mousedownFlag == true)) {
+    if (m_screenshotFlag == true) {
+        if (m_mousedownFlag == true) {
+            QRect drawRc, rc;
+            getSelectRect(drawRc, m_startShot, pt);
 
-        QRect drawRc, rc;
-        getSelectRect(drawRc, m_startShot, pt);
+            QPen pen = painter.pen();
+            pen.setColor(Qt::black);
+            pen.setStyle(Qt::DotLine);
+            painter.setPen(pen);
+            QColor color = QColor(0, 0, 0, 128);
+            rc.setRect(0, 0, width(), drawRc.top());
+            painter.fillRect(rc, QBrush(color));
+            rc.setRect(0, drawRc.bottom() + 1, width(), height() - drawRc.bottom() - 1);
+            painter.fillRect(rc, QBrush(color));
 
-        QPen pen = painter.pen();
-        pen.setColor(Qt::black);
-        pen.setStyle(Qt::DotLine);
-        painter.setPen(pen);
-        QColor color = QColor(0, 0, 0, 128);
-        rc.setRect(0, 0, width(), drawRc.top());
-        painter.fillRect(rc, QBrush(color));
-        rc.setRect(0, drawRc.bottom() + 1, width(), height() - drawRc.bottom() - 1);
-        painter.fillRect(rc, QBrush(color));
+            rc.setRect(0, drawRc.top(), drawRc.left(), drawRc.height());
+            painter.fillRect(rc, QBrush(color));
+            rc.setRect(drawRc.right() + 1, drawRc.top(), width() - drawRc.right() - 1, drawRc.height());
+            painter.fillRect(rc, QBrush(color));
 
-        rc.setRect(0, drawRc.top(), drawRc.left(), drawRc.height());
-        painter.fillRect(rc, QBrush(color));
-        rc.setRect(drawRc.right() + 1, drawRc.top(), width() - drawRc.right() - 1, drawRc.height());
-        painter.fillRect(rc, QBrush(color));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRect(drawRc);
+            pen = painter.pen();
 
-        painter.setBrush(Qt::NoBrush);
-        painter.drawRect(drawRc);
-        pen = painter.pen();
-
-        pen.setStyle(Qt::SolidLine);
-        painter.setPen(pen);
+            pen.setStyle(Qt::SolidLine);
+            painter.setPen(pen);
+        } else {
+            painter.setPen(QColor(197, 197, 197));
+            painter.drawLine(0, pt.y(), width(), pt.y());
+            painter.drawLine(pt.x(), 0, pt.x(), height());
+        }
     }
     painter.end();
 }
@@ -1236,7 +1241,7 @@ void MindMapWidget::onPopMenuTrigger()
         onAddChildNodeEvent("");
     } else if (act->text() == "添加剪贴板内容为结点") {
         onAddChildNodeEvent(qApp->clipboard()->text());
-    } else if (act->text() == "开始截图") {
+    } else if (act->text() == "开始截取本窗口") {
         m_screenshotFlag = true;
     } else if (act->text() == "设置下级结点编号") {
         m_selObject->setShowNum(!m_selObject->showNum());
