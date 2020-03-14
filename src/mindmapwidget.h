@@ -1,6 +1,7 @@
 ﻿#ifndef MINDMAPWIDGET_H
 #define MINDMAPWIDGET_H
 
+#include "api/controls/showpixmapdialog.h"
 #include "editcolordialog.h"
 #include "editmarknodedialog.h"
 #include "editnodedialog.h"
@@ -36,6 +37,8 @@ public:
     ~MindMapWidget();
     ///打开导图
     void openProject(int id);
+    void entranceNode(int pid, int id);
+    void backToMindMap();
     void paintEvent(QPaintEvent* event);
     void mouseDoubleClickEvent(QMouseEvent* event);
     void drawRemark(QPainter& painter);
@@ -114,6 +117,7 @@ private:
     QPixmap m_backGroundPix;
     bool m_screenshotFlag;
     QPoint m_startShot;
+    bool m_hasEntranceNode;
     void loadBackground();
     int getQryValue(QSqlQuery& qry, int index, int defaultValue);
     int getQryValue(QSqlQuery& qry, QString fieldName, int defaultValue);

@@ -14,6 +14,7 @@ MindMapWidget::MindMapWidget(QWidget* parent)
     m_backgroundId = 0;
     m_screenshotFlag = false;
     setMouseTracking(true);
+    m_hasEntranceNode = false;
 }
 
 MindMapWidget::~MindMapWidget()
@@ -30,6 +31,22 @@ void MindMapWidget::openProject(int id)
     loadBackground();
     update();
     m_myDao->sqliteWrapper->execute(QString("insert into mind_history(pid) values (%1)").arg(id));
+    m_hasEntranceNode = false;
+}
+
+void MindMapWidget::entranceNode(int pid, int id)
+{
+    m_rootPoint = QPoint(32, 0);
+    clear();
+    addNode(pid, id);
+    m_hasEntranceNode = true;
+    update();
+}
+
+void MindMapWidget::backToMindMap()
+{
+
+    openProject(m_projectId);
 }
 
 void MindMapWidget::paintEvent(QPaintEvent* event)
@@ -39,6 +56,16 @@ void MindMapWidget::paintEvent(QPaintEvent* event)
 
 void MindMapWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
+    QPoint pt = mapFromGlobal(cursor().pos());
+    for (int i = 0; i < m_mindMapObjects.count() - 1; i++) {
+        MindMapObject* obj = m_mindMapObjects.at(i);
+        if (obj->imgRect.contains(pt)) {
+            showPixmapDialog* dlg = new showPixmapDialog();
+            dlg->setImage(obj->img());
+            dlg->exec();
+            delete dlg;
+        }
+    }
     emit onDoubleClick();
 }
 
@@ -95,8 +122,9 @@ void MindMapWidget::addNode(int pid, int id)
         QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img from mind_data where id=%1 order by sxh,id").arg(id);
         m_myDao->sqliteWrapper->select(sql, qry);
         qry.next();
-        addNodeInfo(obj, 1, qry);
 
+        addNodeInfo(obj, 1, qry);
+        obj->setPid(-1);
         addNode(obj->id());
 
     } else {
@@ -251,6 +279,7 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
                     painter.setBrush(Qt::NoBrush);
                     painter.setPen(QColor(197, 197, 197));
                     painter.drawRect(pixRc);
+                    obj->imgRect = pixRc;
                 }
             }
             pen = painter.pen();
@@ -562,13 +591,16 @@ void MindMapWidget::showSelPopMenu()
               << "删除图片"
               << "添加空结点"
               << "添加剪贴板内容为结点"
+              << "进入结点"
               << "标记结点"
               << "剪切结点"
               << "粘贴结点"
               << "上移结点"
               << "下移结点"
               << "删除结点"
-              << "设置下级结点编号";
+              << "设置下级结点编号"
+              << "返回导图";
+
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
             if (m_selObject->link().trimmed() == "") {
@@ -590,7 +622,12 @@ void MindMapWidget::showSelPopMenu()
             if (m_selObject->hasImg() == false) {
                 continue;
             }
+        } else if (menuNames[i] == "返回导图") {
+            if (m_hasEntranceNode == false) {
+                continue;
+            }
         }
+
         QAction* act = new QAction(this);
         act->setText(menuNames[i]);
         connect(act, &QAction::triggered, this, &MindMapWidget::onPopMenuTrigger);
@@ -609,7 +646,8 @@ void MindMapWidget::showPopMenu()
     QStringList menuNames;
     menuNames
         << "开始截取本窗口"
-        << "查找和替换";
+        << "查找和替换"
+        << "返回导图";
     for (int i = 0; i < menuNames.count(); i++) {
         if (menuNames[i] == "打开链接") {
             if (m_selObject->link().trimmed() == "") {
@@ -1206,6 +1244,13 @@ void MindMapWidget::onPopMenuTrigger()
         }
     } else if (act->text() == "删除结点") {
         delSelObject();
+    } else if (act->text() == "进入结点") {
+        if (m_selObject == nullptr) {
+            return;
+        }
+        entranceNode(-1, m_selObject->id());
+    } else if (act->text() == "返回导图") {
+        backToMindMap();
     } else if (act->text() == "粘贴文本") {
         if (m_selObject == nullptr) {
             return;

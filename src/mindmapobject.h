@@ -65,6 +65,7 @@ public:
     bool hasImg();
     void setImg(QPixmap& img);
     QPixmap& img();
+    QRect imgRect;
 
 private:
     int m_pid;

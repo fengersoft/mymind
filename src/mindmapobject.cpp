@@ -17,6 +17,8 @@ MindMapObject::MindMapObject(QObject* parent)
     m_showNum = false;
     m_newObj = nullptr;
     m_srcObj = nullptr;
+    m_hasImg = false;
+    imgRect = QRect(0, 0, 0, 0);
 }
 
 void MindMapObject::setPid(int pid)

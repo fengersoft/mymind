@@ -19,6 +19,8 @@ SOURCES += \
     src/aboutdialog.cpp \
     src/api/color/colortable.cpp \
     src/api/controls/colorwidget.cpp \
+    src/api/controls/pixmapviewer.cpp \
+    src/api/controls/showpixmapdialog.cpp \
     src/api/file/fileseacher.cpp \
     src/api/sql/sqldef.cpp \
     src/api/sql/sqlitewrapper.cpp \
@@ -43,6 +45,8 @@ HEADERS += \
     src/aboutdialog.h \
     src/api/color/colortable.h \
     src/api/controls/colorwidget.h \
+    src/api/controls/pixmapviewer.h \
+    src/api/controls/showpixmapdialog.h \
     src/api/file/fileseacher.h \
     src/api/sql/sqldef.h \
     src/api/sql/sqlitewrapper.h \
@@ -65,6 +69,8 @@ HEADERS += \
 FORMS += \
     src/aboutdialog.ui \
     src/api/controls/colorwidget.ui \
+    src/api/controls/pixmapviewer.ui \
+    src/api/controls/showpixmapdialog.ui \
     src/editcolordialog.ui \
     src/editlinkdialog.ui \
     src/editmarknodedialog.ui \
