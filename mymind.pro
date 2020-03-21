@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/aboutdialog.cpp \
+    src/api/capture/capturewindow.cpp \
     src/api/color/colortable.cpp \
     src/api/controls/colorwidget.cpp \
     src/api/controls/pixmapviewer.cpp \
@@ -43,6 +44,7 @@ SOURCES += \
 
 HEADERS += \
     src/aboutdialog.h \
+    src/api/capture/capturewindow.h \
     src/api/color/colortable.h \
     src/api/controls/colorwidget.h \
     src/api/controls/pixmapviewer.h \
@@ -68,6 +70,7 @@ HEADERS += \
 
 FORMS += \
     src/aboutdialog.ui \
+    src/api/capture/capturewindow.ui \
     src/api/controls/colorwidget.ui \
     src/api/controls/pixmapviewer.ui \
     src/api/controls/showpixmapdialog.ui \

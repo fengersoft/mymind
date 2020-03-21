@@ -1,6 +1,7 @@
 ﻿#ifndef MINDMAPWIDGET_H
 #define MINDMAPWIDGET_H
 
+#include "api/capture/capturewindow.h"
 #include "api/controls/showpixmapdialog.h"
 #include "editcolordialog.h"
 #include "editmarknodedialog.h"
@@ -14,6 +15,7 @@
 #include <QClipboard>
 #include <QDateTime>
 #include <QDesktopServices>
+#include <QDesktopWidget>
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFileDialog>

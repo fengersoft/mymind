@@ -57,7 +57,7 @@ void MindMapWidget::paintEvent(QPaintEvent* event)
 void MindMapWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
     QPoint pt = mapFromGlobal(cursor().pos());
-    for (int i = 0; i < m_mindMapObjects.count() - 1; i++) {
+    for (int i = 0; i < m_mindMapObjects.count(); i++) {
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (obj->imgRect.contains(pt)) {
             showPixmapDialog* dlg = new showPixmapDialog();
@@ -471,7 +471,6 @@ void MindMapWidget::getChilds(int pid, QList<int>& ids)
     for (int i = 0; i < m_mindMapObjects.count(); i++) {
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (obj->pid() == pid) {
-            qDebug() << obj->name();
             ids << obj->id();
             getChilds(obj->id(), ids);
         }
@@ -646,6 +645,8 @@ void MindMapWidget::showPopMenu()
     QStringList menuNames;
     menuNames
         << "开始截取本窗口"
+        << "开始截取桌面"
+        << "开始截取桌面(不隐藏当前窗口)"
         << "查找和替换"
         << "返回导图";
     for (int i = 0; i < menuNames.count(); i++) {
@@ -1136,7 +1137,7 @@ void MindMapWidget::saveMindMapAsNewProject()
             sql = QString("update mind_data set name='%1' where id=%2")
                       .arg(s)
                       .arg(maxId);
-            qDebug() << sql;
+
             m_myDao->sqliteWrapper->execute(sql);
         }
     }
@@ -1297,6 +1298,10 @@ void MindMapWidget::onPopMenuTrigger()
         SearchAndReplaceDialog* dlg = new SearchAndReplaceDialog();
         dlg->setMindMapWidget(this);
         dlg->exec();
+    } else if (act->text() == "开始截取桌面") {
+        startShootScreen();
+    } else if (act->text() == "开始截取桌面(不隐藏当前窗口)") {
+        startShootScreen(false);
     }
 }
 
