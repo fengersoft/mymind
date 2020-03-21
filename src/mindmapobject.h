@@ -67,6 +67,9 @@ public:
     QPixmap& img();
     QRect imgRect;
 
+    bool shrink() const;
+    void setShrink(bool shrink);
+
 private:
     int m_pid;
     int m_id;
@@ -89,6 +92,7 @@ private:
     MindMapObject* m_srcObj;
     bool m_hasImg;
     QPixmap m_img;
+    bool m_shrink;
 signals:
 
 public slots:

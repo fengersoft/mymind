@@ -19,6 +19,9 @@ MindMapObject::MindMapObject(QObject* parent)
     m_srcObj = nullptr;
     m_hasImg = false;
     imgRect = QRect(0, 0, 0, 0);
+    m_shrink = false;
+    m_underline = false;
+    m_overline = false;
 }
 
 void MindMapObject::setPid(int pid)
@@ -236,6 +239,16 @@ void MindMapObject::setImg(QPixmap& img)
 QPixmap& MindMapObject::img()
 {
     return m_img;
+}
+
+bool MindMapObject::shrink() const
+{
+    return m_shrink;
+}
+
+void MindMapObject::setShrink(bool shrink)
+{
+    m_shrink = shrink;
 }
 
 bool MindMapObject::value(int setType)

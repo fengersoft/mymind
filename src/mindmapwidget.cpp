@@ -119,7 +119,7 @@ void MindMapWidget::addNode(int pid, int id)
     if (pid == -1) {
         MindMapObject* obj = new MindMapObject(this);
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img from mind_data where id=%1 order by sxh,id").arg(id);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img,shrink from mind_data where id=%1 order by sxh,id").arg(id);
         m_myDao->sqliteWrapper->select(sql, qry);
         qry.next();
 
@@ -130,7 +130,7 @@ void MindMapWidget::addNode(int pid, int id)
     } else {
 
         QSqlQuery qry;
-        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img from mind_data where pid=%1  order by sxh,id").arg(pid);
+        QString sql = QString("select pid,id,name,remark,link,fontcolor,backColor,sxh,showNum,bold,italics,overline,underline,strikeOut,img,shrink from mind_data where pid=%1  order by sxh,id").arg(pid);
         m_myDao->sqliteWrapper->select(sql, qry);
         i = 1;
         while (qry.next()) {
@@ -156,7 +156,9 @@ void MindMapWidget::addNodeInfo(MindMapObject* obj, int i, QSqlQuery& qry)
     obj->setBackColor(backColor);
     int sxh = qry.value(7).toInt();
     if (sxh != i) {
-        m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
+        if (m_hasEntranceNode == false) {
+            m_myDao->sqliteWrapper->execute(QString("update mind_data set sxh=%1 where id=%2").arg(i).arg(obj->id()));
+        }
     }
     obj->setSxh(i);
     obj->setBold(getQryValueBool(qry, "bold"));
@@ -164,6 +166,7 @@ void MindMapWidget::addNodeInfo(MindMapObject* obj, int i, QSqlQuery& qry)
     obj->setOverline(getQryValueBool(qry, "overline"));
     obj->setUnderline(getQryValueBool(qry, "underline"));
     obj->setStrikeOut(getQryValueBool(qry, "strikeOut"));
+    obj->setShrink(getQryValueBool(qry, "shrink"));
     obj->setHasImg(qry.value("img").isNull() == false);
     if (!qry.value("img").isNull()) {
         QByteArray ba = qry.value("img").toByteArray();
@@ -201,6 +204,7 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
     int m = 0;
     QFont font;
     QPoint pt = mapFromGlobal(cursor().pos());
+    bool isShrink = false;
     for (int i = 0; i < m_mindMapObjects.count(); i++) {
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (obj->pid() == pid) {
@@ -214,6 +218,7 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             QFontMetrics fm = painter.fontMetrics();
             int reMarkWidth = obj->remark().trimmed() == "" ? 0 : 12;
             rc.setRect(x, y + n / 2 + m, fm.width(obj->name()) + 8 + reMarkWidth + 8 + obj->markNodes.count() * 16 + 64, 24);
+
             obj->remarkRect.setRect(x + fm.width(obj->name()) + 32, rc.top() + (rc.height() - 15) / 2, 12, 15);
             obj->addRect.setRect(x + fm.width(obj->name()) + 8 + reMarkWidth + obj->markNodes.count() * 16 + 64, rc.top() + rc.height() - 8, 16, 16);
             if (obj == m_selObject) {
@@ -230,6 +235,9 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
             fillRc.setRight(rc.right() - 16);
             obj->rect = fillRc;
             painter.fillRect(fillRc, painter.brush());
+            if (obj->parentObj() != nullptr) {
+                isShrink = obj->parentObj()->shrink();
+            }
             QPen pen;
             //绘制编号
             if ((obj->parentObj() != nullptr) && (obj->parentObj()->showNum())) {
@@ -307,8 +315,27 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
                 path.cubicTo(pts[1], pts[2], pts[3]);
                 painter.drawPath(path);
             }
+            if (obj->shrink() == false) {
+                drawNode(obj->id(), rc.right(), rc.top() + rc.height(), rc.right() + 24, rc.top() - n / 2, painter);
+            } else {
+                QRect rc = obj->addRect;
 
-            drawNode(obj->id(), rc.right(), rc.top() + rc.height(), rc.right() + 24, rc.top() - n / 2, painter);
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(QBrush(QColor(10, 123, 251)));
+                painter.drawEllipse(rc);
+                painter.setPen(Qt::white);
+                font = painter.font();
+                font.setItalic(false);
+                font.setUnderline(false);
+                font.setOverline(false);
+                font.setStrikeOut(false);
+                font.setBold(true);
+
+                font.setPointSize(16);
+
+                painter.setFont(font);
+                painter.drawText(rc, Qt::AlignCenter, "…");
+            }
         }
     }
 
@@ -324,10 +351,19 @@ void MindMapWidget::drawNode(int pid, int px, int py, int x, int y, QPainter& pa
         font.setUnderline(false);
         font.setOverline(false);
         font.setStrikeOut(false);
-        font.setPointSize(24);
         font.setBold(true);
-        painter.setFont(font);
-        painter.drawText(rc, Qt::AlignCenter, "+");
+
+        if (isShrink) {
+            font.setPointSize(16);
+
+            painter.setFont(font);
+            painter.drawText(rc, Qt::AlignCenter, "…");
+        } else {
+            font.setPointSize(24);
+
+            painter.setFont(font);
+            painter.drawText(rc, Qt::AlignCenter, "+");
+        }
     }
 }
 
@@ -340,7 +376,13 @@ void MindMapWidget::mousePressEvent(QMouseEvent* event)
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (obj->addRect.contains(pt)) {
             m_selObject = obj;
-            onAddChildNodeEvent();
+            if (obj->shrink()) {
+                obj->setShrink(false);
+                m_myDao->sqliteWrapper->execute(QString("update mind_data set shrink=0 where id=%1").arg(m_selObject->id()));
+            } else {
+                onAddChildNodeEvent();
+            }
+
             update();
             return;
         }
@@ -439,6 +481,10 @@ void MindMapWidget::getMindWidgetsChildNum()
 
 void MindMapWidget::getNodeCount(MindMapObject* pobj, int& n)
 {
+    if (pobj->shrink()) {
+        n = 1;
+        return;
+    }
     for (int i = 0; i < m_mindMapObjects.count(); i++) {
         MindMapObject* obj = m_mindMapObjects.at(i);
         if (pobj->id() == obj->pid()) {
@@ -598,6 +644,7 @@ void MindMapWidget::showSelPopMenu()
               << "下移结点"
               << "删除结点"
               << "设置下级结点编号"
+              << "收缩结点"
               << "返回导图";
 
     for (int i = 0; i < menuNames.count(); i++) {
@@ -1302,6 +1349,13 @@ void MindMapWidget::onPopMenuTrigger()
         startShootScreen();
     } else if (act->text() == "开始截取桌面(不隐藏当前窗口)") {
         startShootScreen(false);
+    } else if (act->text() == "收缩结点") {
+        if (m_selObject == nullptr) {
+            return;
+        }
+        m_selObject->setShrink(true);
+        m_myDao->sqliteWrapper->execute(QString("update mind_data set shrink=1 where id=%1").arg(m_selObject->id()));
+        update();
     }
 }
 
