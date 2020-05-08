@@ -118,6 +118,7 @@ private:
     int m_backgroundId;
     QPixmap m_backGroundPix;
     bool m_screenshotFlag;
+    bool m_saveshotToFile;
     QPoint m_startShot;
     bool m_hasEntranceNode;
     void loadBackground();

@@ -507,7 +507,16 @@ void MindMapWidget::mouseReleaseEvent(QMouseEvent* event)
         QRect rc;
         getSelectRect(rc, m_startShot, pt);
         QPixmap pix = grab(rc);
-        qApp->clipboard()->setPixmap(pix);
+        if (m_saveshotToFile) {
+            QDir dir;
+            dir.mkpath(QApplication::applicationDirPath() + "/screenshots");
+            QString filename = QApplication::applicationDirPath() + "/screenshots/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
+            pix.save(filename, "png");
+            qApp->clipboard()->setText(filename);
+        } else {
+            qApp->clipboard()->setPixmap(pix);
+        }
+
         m_screenshotFlag = false;
     }
 }
@@ -692,6 +701,7 @@ void MindMapWidget::showPopMenu()
     QStringList menuNames;
     menuNames
         << "开始截取本窗口"
+        << "开始截取本窗口，然后自动保存"
         << "开始截取桌面"
         << "开始截取桌面(不隐藏当前窗口)"
         << "查找和替换"
@@ -1336,6 +1346,10 @@ void MindMapWidget::onPopMenuTrigger()
         onAddChildNodeEvent(qApp->clipboard()->text());
     } else if (act->text() == "开始截取本窗口") {
         m_screenshotFlag = true;
+        m_saveshotToFile = false;
+    } else if (act->text() == "开始截取本窗口，然后自动保存") {
+        m_screenshotFlag = true;
+        m_saveshotToFile = true;
     } else if (act->text() == "设置下级结点编号") {
         m_selObject->setShowNum(!m_selObject->showNum());
         int shownum = m_selObject->showNum() == true ? 1 : 0;
