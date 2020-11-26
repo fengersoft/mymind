@@ -4,10 +4,13 @@ MindMapObject::MindMapObject(QObject* parent)
     : QObject(parent)
 {
 
-    m_parentObj = nullptr;
+
+    m_parentObj
+        = nullptr;
     static QColor colors[12] = { QColor(229, 77, 66), QColor(243, 123, 29), QColor(251, 189, 8),
-        QColor(141, 198, 63), QColor(57, 181, 74), QColor(28, 187, 180), QColor(0, 129, 255),
-        QColor(103, 57, 182), QColor(156, 38, 176), QColor(224, 57, 151), QColor(165, 103, 63), QColor(135, 153, 163) };
+                                 QColor(141, 198, 63), QColor(57, 181, 74), QColor(28, 187, 180), QColor(0, 129, 255),
+                                 QColor(103, 57, 182), QColor(156, 38, 176), QColor(224, 57, 151), QColor(165, 103, 63), QColor(135, 153, 163)
+                               };
     int i = qrand() % 12;
     m_lineColor = colors[i];
     i = qrand() % 12;
@@ -117,7 +120,8 @@ int MindMapObject::backColor()
 
 MindMapObject::~MindMapObject()
 {
-    if (m_newObj != nullptr) {
+    if (m_newObj != nullptr)
+    {
         delete m_newObj;
     }
 }
@@ -194,22 +198,32 @@ bool MindMapObject::strikOut()
 
 void MindMapObject::setValue(int setType, bool value)
 {
-    if (setType == SET_BOLD) {
+    if (setType == SET_BOLD)
+    {
         setBold(value);
-    } else if (setType == SET_ITALICS) {
+    }
+    else if (setType == SET_ITALICS)
+    {
         setItalics(value);
-    } else if (setType == SET_OVERLINE) {
+    }
+    else if (setType == SET_OVERLINE)
+    {
         setOverline(value);
-    } else if (setType == SET_UNDERLINE) {
+    }
+    else if (setType == SET_UNDERLINE)
+    {
         setUnderline(value);
-    } else if (setType == SET_STRIKEOUT) {
+    }
+    else if (setType == SET_STRIKEOUT)
+    {
         setStrikeOut(value);
     }
 }
 
 MindMapObject* MindMapObject::newObj()
 {
-    if (m_newObj == nullptr) {
+    if (m_newObj == nullptr)
+    {
         m_newObj = new MindMapObject(nullptr);
         m_newObj->m_srcObj = this;
     }
@@ -253,15 +267,24 @@ void MindMapObject::setShrink(bool shrink)
 
 bool MindMapObject::value(int setType)
 {
-    if (setType == SET_BOLD) {
+    if (setType == SET_BOLD)
+    {
         return bold();
-    } else if (setType == SET_ITALICS) {
+    }
+    else if (setType == SET_ITALICS)
+    {
         return italics();
-    } else if (setType == SET_OVERLINE) {
+    }
+    else if (setType == SET_OVERLINE)
+    {
         return overline();
-    } else if (setType == SET_UNDERLINE) {
+    }
+    else if (setType == SET_UNDERLINE)
+    {
         return underline();
-    } else if (setType == SET_STRIKEOUT) {
+    }
+    else if (setType == SET_STRIKEOUT)
+    {
         return strikOut();
     }
     return false;

@@ -512,6 +512,7 @@ void MindMapWidget::mouseReleaseEvent(QMouseEvent* event)
             dir.mkpath(QApplication::applicationDirPath() + "/screenshots");
             QString filename = QApplication::applicationDirPath() + "/screenshots/" + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
             pix.save(filename, "png");
+            filename = filename.replace("/", "\\");
             qApp->clipboard()->setText(filename);
         } else {
             qApp->clipboard()->setPixmap(pix);
