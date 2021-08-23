@@ -42,7 +42,8 @@ void MainWindow::openDefaultProject()
     QSqlQuery qry;
     QString sql = "select pid from mind_history order by id desc";
     myDao->sqliteWrapper->select(sql, qry);
-    if (qry.next()) {
+    if (qry.next())
+    {
         int pid = qry.value(0).toInt();
         mindMapWidget->openProject(pid);
     }
@@ -53,7 +54,8 @@ void MainWindow::addNewProject()
     EditNodeDialog* dlg = new EditNodeDialog();
     dlg->setWindowTitle("新建导图");
     int ret = dlg->exec();
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         QString name = dlg->getName();
         int id = myDao->addNode(-1, name, 1);
         mindMapWidget->openProject(id);
@@ -66,18 +68,21 @@ void MainWindow::showOpenProjectDialog()
     OpenProjectDialog* dlg = new OpenProjectDialog();
     dlg->setMyDao(myDao);
     int ret = dlg->exec();
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         mindMapWidget->openProject(dlg->id());
     }
 }
 
 void MainWindow::deleteProject()
 {
-    if (mindMapWidget->projectId() == -1) {
+    if (mindMapWidget->projectId() == -1)
+    {
         return;
     }
     int ret = QMessageBox::question(this, "提示", "确定删除当前导图吗?");
-    if (ret == QMessageBox::No) {
+    if (ret == QMessageBox::No)
+    {
         return;
     }
     mindMapWidget->deleteProject();
@@ -89,9 +94,11 @@ void MainWindow::openRecentProject()
     dlg->setMyDao(myDao);
     int ret = dlg->exec();
 
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         int pid = dlg->pid();
-        if (pid != -1) {
+        if (pid != -1)
+        {
             mindMapWidget->openProject(pid);
         }
     }
@@ -102,14 +109,16 @@ void MainWindow::openRecentProject()
 void MainWindow::on_btnEdit_clicked()
 {
     MindMapObject* selObj = mindMapWidget->selObject();
-    if (selObj == nullptr) {
+    if (selObj == nullptr)
+    {
         return;
     }
     EditNodeDialog* dlg = new EditNodeDialog();
     dlg->setName(selObj->name());
     dlg->setWindowTitle("修改");
     int ret = dlg->exec();
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         QString name = dlg->getName();
         myDao->editNode(selObj->id(), name);
         mindMapWidget->editNode(selObj, name);
@@ -129,15 +138,28 @@ void MainWindow::on_btnMenu_clicked()
               << "查看导图大纲"
               << "删除导图"
               << "设置导图背景"
+              << "-"
               << "导出导图为图片"
               << "导出导图为Markdown"
               << "导出导图为txt文件"
               << "保存导图为新导图"
+              << "-"
+              << "删除所有导图"
+              << "-"
               << "关于导图";
-    for (int i = 0; i < menuNames.count(); i++) {
+    for (int i = 0; i < menuNames.count(); i++)
+    {
         QAction* act = new QAction(menu);
-        connect(act, &QAction::triggered, this, &MainWindow::onMenuItemTriggered);
-        act->setText(menuNames[i]);
+        if (menuNames[i] == "-")
+        {
+            act->setSeparator(true);
+        }
+        else
+        {
+            connect(act, &QAction::triggered, this, &MainWindow::onMenuItemTriggered);
+            act->setText(menuNames[i]);
+        }
+
         menu->addAction(act);
     }
     menu->exec(pt);
@@ -147,41 +169,82 @@ void MainWindow::on_btnMenu_clicked()
 void MainWindow::onMenuItemTriggered(bool checked)
 {
     QAction* act = static_cast<QAction*>(sender());
-    if (act->text() == "新建导图") {
+    if (act->text() == "新建导图")
+    {
         addNewProject();
-    } else if (act->text() == "打开导图") {
+    }
+    else if (act->text() == "打开导图")
+    {
         showOpenProjectDialog();
-    } else if (act->text() == "删除导图") {
+    }
+    else if (act->text() == "删除导图")
+    {
         deleteProject();
-    } else if (act->text() == "最近导图") {
+    }
+    else if (act->text() == "最近导图")
+    {
         openRecentProject();
-    } else if (act->text() == "导出导图为图片") {
+    }
+    else if (act->text() == "导出导图为图片")
+    {
         mindMapWidget->saveDataAsPng();
-    } else if (act->text() == "导出导图为Markdown") {
+    }
+    else if (act->text() == "导出导图为Markdown")
+    {
         mindMapWidget->saveDataAsMarkdown();
-    } else if (act->text() == "导出导图为txt文件") {
+    }
+    else if (act->text() == "导出导图为txt文件")
+    {
         mindMapWidget->saveDataAsTxtFile();
-    } else if (act->text() == "保存导图为新导图") {
+    }
+    else if (act->text() == "保存导图为新导图")
+    {
         mindMapWidget->saveMindMapAsNewProject();
-    } else if (act->text() == "设置导图背景") {
-        if (mindMapWidget->projectId() == -1) {
+    }
+    else if (act->text() == "设置导图背景")
+    {
+        if (mindMapWidget->projectId() == -1)
+        {
             return;
         }
         SetBackGroundDialog* dlg = new SetBackGroundDialog();
         int ret = dlg->exec();
-        if (ret == QDialog::Accepted) {
+        if (ret == QDialog::Accepted)
+        {
             mindMapWidget->setBackGroundId(dlg->bid());
             myDao->sqliteWrapper->execute(QString("delete from mind_set where pid=%1").arg(mindMapWidget->projectId()));
             myDao->sqliteWrapper->execute(QString("insert into mind_set (pid,bid) values (%1,%2)").arg(mindMapWidget->projectId()).arg(dlg->bid()));
         }
         delete dlg;
-    } else if (act->text() == "查看导图大纲") {
+    }
+    else if (act->text() == "查看导图大纲")
+    {
         mindMapWidget->showMindLineOut();
-    } else if (act->text() == "关于导图") {
+    }
+    else if (act->text() == "关于导图")
+    {
         AboutDialog* dlg = new AboutDialog();
         dlg->exec();
         delete dlg;
     }
+    else if (act->text() == "删除所有导图")
+    {
+        if (QMessageBox::question(this, "提示", "确定要删除所有导图吗?") == QMessageBox::No)
+        {
+            return;
+        }
+        QString tables[] = {"mind_color", "mind_data", "mind_flag", "mind_global", "mind_history", "mind_set"};
+        for (int i = 0; i < 6; i++)
+        {
+            QString sql = QString("delete  from %1").arg(tables[i]);
+            myDao->sqliteWrapper->execute(sql);
+            qApp->exit(773);
+
+        }
+
+
+    }
+
 }
 
 void MainWindow::ontmrTimeOut()
@@ -194,13 +257,15 @@ void MainWindow::ontmrTimeOut()
 void MainWindow::on_btnRemark_clicked()
 {
     MindMapObject* selObj = mindMapWidget->selObject();
-    if (selObj == nullptr) {
+    if (selObj == nullptr)
+    {
         return;
     }
     EditRemarkDialog* dlg = new EditRemarkDialog();
     dlg->setRemark(selObj->remark());
     int ret = dlg->exec();
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         selObj->setRemark(dlg->remark());
         myDao->sqliteWrapper->execute(QString("update mind_data set remark='%1' where id=%2").arg(dlg->remark()).arg(selObj->id()));
         update();
@@ -211,13 +276,15 @@ void MainWindow::on_btnRemark_clicked()
 void MainWindow::on_btnLink_clicked()
 {
     MindMapObject* selObj = mindMapWidget->selObject();
-    if (selObj == nullptr) {
+    if (selObj == nullptr)
+    {
         return;
     }
     EditLinkDialog* dlg = new EditLinkDialog();
     dlg->setLink(selObj->link());
     int ret = dlg->exec();
-    if (ret == QDialog::Accepted) {
+    if (ret == QDialog::Accepted)
+    {
         selObj->setLink(dlg->link());
         myDao->sqliteWrapper->execute(QString("update mind_data set link='%1' where id=%2").arg(dlg->link()).arg(selObj->id()));
         update();

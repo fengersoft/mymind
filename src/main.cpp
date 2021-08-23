@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QFontDatabase>
+#include <QProcess>
 
 int main(int argc, char* argv[])
 {
@@ -13,5 +14,11 @@ int main(int argc, char* argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-    return a.exec();
+    int ret = a.exec();
+    if (ret == 773)
+    {
+        QProcess::startDetached(qApp->applicationFilePath());
+    }
+
+    return ret;
 }

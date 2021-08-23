@@ -19,10 +19,12 @@ SOURCES += \
     src/aboutdialog.cpp \
     src/api/capture/capturewindow.cpp \
     src/api/color/colortable.cpp \
+    src/api/controls/base/widgethelper.cpp \
     src/api/controls/colorwidget.cpp \
     src/api/controls/pixmapviewer.cpp \
     src/api/controls/showpixmapdialog.cpp \
     src/api/file/fileseacher.cpp \
+    src/api/ocr/ocrapi.cpp \
     src/api/sql/sqldef.cpp \
     src/api/sql/sqlitewrapper.cpp \
     src/editcolordialog.cpp \
@@ -46,10 +48,12 @@ HEADERS += \
     src/aboutdialog.h \
     src/api/capture/capturewindow.h \
     src/api/color/colortable.h \
+    src/api/controls/base/widgethelper.h \
     src/api/controls/colorwidget.h \
     src/api/controls/pixmapviewer.h \
     src/api/controls/showpixmapdialog.h \
     src/api/file/fileseacher.h \
+    src/api/ocr/ocrapi.h \
     src/api/sql/sqldef.h \
     src/api/sql/sqlitewrapper.h \
     src/editcolordialog.h \
@@ -88,6 +92,8 @@ FORMS += \
     src/setbackgrounddialog.ui \
     src/showmindlineoutdialog.ui
 
+
+include ($$PWD/src/api/ocrlib/ocrlib.pri)
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
